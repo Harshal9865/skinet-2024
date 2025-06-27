@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specification;
+using Core.Specifications;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -10,88 +12,82 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _repo;
+        private readonly IGenericRepository<Product> _repo;
 
-        public ProductsController(IProductRepository repo)
+        public ProductsController(IGenericRepository<Product> repo)
         {
             _repo = repo;
         }
 
-        // GET: api/products?brand=Nike&type=Shoes&sort=priceAsc
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<Product>>> GetProducts(string? brand, string? type, string? sort)
         {
-            return Ok(await _repo.GetProductAsync(brand, type, sort));
+            var spec = new ProductSpecification(brand, type, sort);
+            var products = await _repo.ListAsync(spec);
+            return Ok(products);
         }
 
-        // GET: api/products/2
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _repo.GetProductByIdAsync(id);
+            var product = await _repo.GetByIdAsync(id);
             if (product == null) return NotFound();
             return Ok(product);
         }
 
-        // POST: api/products
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            _repo.AddProduct(product);
-            if (await _repo.SaveChangesAsync())
+            _repo.Add(product);
+            if (await _repo.SaveAllAsync())
             {
                 return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
             }
             return BadRequest("Problem creating product");
         }
 
-        // PUT: api/products/2
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateProduct(int id, Product product)
         {
-            if (product.Id != id || !ProductExists(id))
+            if (product.Id != id || !_repo.Exists(id))
                 return BadRequest("Cannot update this product");
 
-            _repo.UpdateProduct(product);
-            if (await _repo.SaveChangesAsync())
+            _repo.Update(product);
+            if (await _repo.SaveAllAsync())
             {
                 return NoContent();
             }
             return BadRequest("Problem updating the product");
         }
 
-        // DELETE: api/products/2
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
-            var product = await _repo.GetProductByIdAsync(id);
+            var product = await _repo.GetByIdAsync(id);
             if (product == null) return NotFound();
 
-            _repo.DeleteProduct(product);
-            if (await _repo.SaveChangesAsync())
+            _repo.Remove(product);
+            if (await _repo.SaveAllAsync())
             {
                 return NoContent();
             }
             return BadRequest("Problem deleting the product");
         }
 
-        // GET: api/products/brands
         [HttpGet("brands")]
         public async Task<ActionResult<IReadOnlyList<string>>> GetBrands()
         {
-            return Ok(await _repo.GetBrandAsync());
+            var spec = new BrandListSpecification();
+            var brands = await _repo.ListAsync(spec);
+            return Ok(brands);
         }
 
-        // GET: api/products/types
         [HttpGet("types")]
         public async Task<ActionResult<IReadOnlyList<string>>> GetTypes()
         {
-            return Ok(await _repo.GetTypeAsync());
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _repo.ProductExists(id);
+            var spec = new TypeListSpecification();
+            var types = await _repo.ListAsync(spec);
+            return Ok(types);
         }
     }
 }

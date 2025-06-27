@@ -14,8 +14,9 @@ builder.Services.AddDbContext<StoreContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// Register repository
+// Register repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
@@ -28,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Must be before builder.Build()
+// Optional: Configure Kestrel (mostly for custom ports)
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5050); // HTTP
@@ -37,14 +38,15 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-// Seed database before running
+// Migrate and seed database
 try
 {
     using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<StoreContext>();
-    await context.Database.MigrateAsync(); // Apply migrations
-    await StoreContextSeed.SeedAsync(context); // Seed data
+
+    await context.Database.MigrateAsync(); // Apply pending migrations
+    await StoreContextSeed.SeedAsync(context); // Seed initial data
 }
 catch (Exception ex)
 {
@@ -65,4 +67,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
