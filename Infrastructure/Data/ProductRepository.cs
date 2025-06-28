@@ -13,7 +13,7 @@ namespace Infrastructure.Data
 
         public ProductRepository(StoreContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public void AddProduct(Product product)
@@ -26,23 +26,25 @@ namespace Infrastructure.Data
             _context.Products.Remove(product);
         }
 
-        public async Task<IReadOnlyList<string>> GetBrandAsync()
+        public async Task<IReadOnlyList<string>> GetBrandsAsync()
         {
             return await _context.Products
                 .Select(x => x.Brand)
                 .Distinct()
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyList<string>> GetTypeAsync()
+        public async Task<IReadOnlyList<string>> GetTypesAsync()
         {
             return await _context.Products
                 .Select(x => x.Type)
                 .Distinct()
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyList<Product>> GetProductAsync(string? brand, string? type, string? sort)
+        public async Task<IReadOnlyList<Product>> GetProductsAsync(string? brand, string? type, string? sort)
         {
             var query = _context.Products.AsQueryable();
 
@@ -52,19 +54,19 @@ namespace Infrastructure.Data
             if (!string.IsNullOrWhiteSpace(type))
                 query = query.Where(x => x.Type == type);
 
-            query = sort switch
+            query = sort?.ToLowerInvariant() switch
             {
-                "priceAsc" => query.OrderBy(x => x.Price),
-                "priceDesc" => query.OrderByDescending(x => x.Price),
+                "priceasc" => query.OrderBy(x => x.Price),
+                "pricedesc" => query.OrderByDescending(x => x.Price),
                 _ => query.OrderBy(x => x.Name)
             };
 
-            return await query.ToListAsync();
+            return await query.ToListAsync().ConfigureAwait(false);
         }
 
         public async Task<Product?> GetProductByIdAsync(int id)
         {
-            return await _context.Products.FindAsync(id);
+            return await _context.Products.FindAsync(id).ConfigureAwait(false);
         }
 
         public bool ProductExists(int id)
@@ -74,7 +76,7 @@ namespace Infrastructure.Data
 
         public async Task<bool> SaveChangesAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            return await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
 
         public void UpdateProduct(Product product)

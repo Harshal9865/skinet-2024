@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using API.RequestHelpers;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Specification;
@@ -8,9 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseApiController
     {
         private readonly IGenericRepository<Product> _repo;
 
@@ -20,11 +20,11 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Product>>> GetProducts(string? brand, string? type, string? sort)
+        public async Task<ActionResult<Pagination<Product>>> GetProducts(
+            [FromQuery] ProductSpecParams specParams)
         {
-            var spec = new ProductSpecification(brand, type, sort);
-            var products = await _repo.ListAsync(spec);
-            return Ok(products);
+            var spec = new ProductSpecification(specParams);
+            return await CreatePagedResult(_repo, spec, specParams.PageIndex, specParams.PageSize);
         }
 
         [HttpGet("{id:int}")]
@@ -77,17 +77,17 @@ namespace API.Controllers
         [HttpGet("brands")]
         public async Task<ActionResult<IReadOnlyList<string>>> GetBrands()
         {
-            var spec = new BrandListSpecification();
-            var brands = await _repo.ListAsync(spec);
-            return Ok(brands);
+            var brands = await _repo.ListAllAsync();
+            var brandList = brands.Select(x => x.Brand).Distinct().ToList();
+            return Ok(brandList);
         }
 
         [HttpGet("types")]
         public async Task<ActionResult<IReadOnlyList<string>>> GetTypes()
         {
-            var spec = new TypeListSpecification();
-            var types = await _repo.ListAsync(spec);
-            return Ok(types);
+            var types = await _repo.ListAllAsync();
+            var typeList = types.Select(x => x.Type).Distinct().ToList();
+            return Ok(typeList);
         }
     }
 }

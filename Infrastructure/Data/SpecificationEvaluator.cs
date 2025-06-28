@@ -24,10 +24,17 @@ namespace Infrastructure.Data
             if (spec.IsDistinct)
                 query = query.Distinct();
 
-            if (spec.Select != null)
-                return query.Select(spec.Select);
+            if (spec.IsPagingEnabled)
+            {
+                query = query.Skip(spec.Skip).Take(spec.Take);
+            }
 
-            throw new InvalidOperationException("No Select projection specified for TResult.");
+            if (spec.Select != null)
+            {
+                return query.Select(spec.Select);
+            }
+
+            throw new InvalidOperationException("No Select projection specified for TResult");
         }
 
         public static IQueryable<T> GetQuery(
@@ -47,6 +54,11 @@ namespace Infrastructure.Data
 
             if (spec.IsDistinct)
                 query = query.Distinct();
+
+            if (spec.IsPagingEnabled)
+            {
+                query = query.Skip(spec.Skip).Take(spec.Take);
+            }
 
             return query;
         }
