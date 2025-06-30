@@ -1,4 +1,32 @@
+@use '@angular/material' as mat;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+$customTheme: mat.define-theme();
+@include mat.core();
+
+.custom-theme {
+  @include mat.all-component-themes($customTheme);
+
+  .mdc-button,
+  .mdc-raised-button,
+  .mdc-stroked-button,
+  .mdc-flat-button {
+    @apply rounded-md;
+  }
+}
+
+.custom-badge .mat-badge-content {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  line-height: 24px; // fixed this from `line: height 24px;`
+}
+
+.custom-badge .mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
