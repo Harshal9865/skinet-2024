@@ -1,3 +1,4 @@
+using API.Middleware;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -5,20 +6,29 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddControllers();
 
-// Register DbContext
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .WithOrigins(
+                  "http://localhost:4200",
+                  "https://localhost:4200"
+              );
+    });
+});
+
 builder.Services.AddDbContext<StoreContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// Register repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -29,32 +39,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Optional: Configure Kestrel (mostly for custom ports)
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5050); // HTTP
-    options.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps()); // HTTPS
+    options.ListenAnyIP(5050);
+    options.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps());
 });
 
 var app = builder.Build();
 
-// Migrate and seed database
-try
-{
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<StoreContext>();
+app.UseMiddleware<ExceptionMiddleware>();
 
-    await context.Database.MigrateAsync(); // Apply pending migrations
-    await StoreContextSeed.SeedAsync(context); // Seed initial data
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Error during migration or seeding: {ex.Message}");
-    throw;
-}
-
-// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -64,8 +58,22 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+try
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<StoreContext>();
+    await context.Database.MigrateAsync();
+    await StoreContextSeed.SeedAsync(context);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error during migration or seeding: {ex.Message}");
+    throw;
+}
+
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
