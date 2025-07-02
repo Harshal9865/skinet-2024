@@ -39,3 +39,9 @@
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
 }
+.active-filters button {
+  font-size: 0.85rem;
+  border-color: indigo;
+  color: rgb(255, 255, 255);
+  background: rgb(158, 102, 198);
+}
