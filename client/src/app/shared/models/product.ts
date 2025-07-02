@@ -1,4 +1,3 @@
-// src/app/shared/models/product.ts
 export type Product = {
   id: number;
   name: string;

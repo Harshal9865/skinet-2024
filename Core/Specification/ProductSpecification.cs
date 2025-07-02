@@ -15,17 +15,22 @@ namespace Core.Specifications
             ApplyPaging(specParams.PageSize * (specParams.PageIndex - 1), specParams.PageSize);
 
             switch (specParams.Sort?.ToLower())
-            {
-                case "priceasc":
-                    AddOrderBy(x => x.Price);
-                    break;
-                case "pricedesc":
-                    AddOrderByDescending(x => x.Price);
-                    break;
-                default:
-                    AddOrderBy(x => x.Name.ToLower());
-                    break;
-            }
+{
+    case "priceasc":
+        AddOrderBy(x => x.Price);
+        break;
+    case "pricedesc":
+        AddOrderByDescending(x => x.Price);
+        break;
+    case "namedesc":
+    case "alphadesc":
+        AddOrderByDescending(x => x.Name.ToLower());
+        break;
+    default:
+        AddOrderBy(x => x.Name.ToLower());
+        break;
+}
+
         }
     }
 }

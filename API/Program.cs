@@ -73,7 +73,16 @@ catch (Exception ex)
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=604800"); // cache static for 7 days
+    }
+});
+
 app.UseCors("CorsPolicy");
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

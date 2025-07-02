@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  max-width: 600px;
+}
+
+mat-selection-list {
+  max-height: 200px;
+  overflow: auto;
+}
