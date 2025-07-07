@@ -42,6 +42,12 @@ export class Shop {
       error: error => console.error(error)
     });
   }
+getProduct(id: number): Observable<Product> {
+  return this.http.get<Product>(`${this.baseUrl}/products/${id}`);
+}
+
+
+
 
   getTypes(): void {
     if (this.types.length > 0) return;

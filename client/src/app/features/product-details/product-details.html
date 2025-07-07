@@ -1,1 +1,13 @@
-<p>product-details works!</p>
+<div *ngIf="!loading; else loadingTemplate" class="p-4">
+  <h2 class="text-2xl font-bold mb-2">{{ product?.name }}</h2>
+  <img [src]="product?.pictureUrl" class="max-w-sm rounded shadow" alt="Product image" />
+  <p class="mt-4 text-lg text-gray-700">{{ product?.price | currency }}</p>
+  <p class="mt-2 text-sm text-gray-500">Brand: {{ product?.brand }}</p>
+  <p class="text-sm text-gray-500">Type: {{ product?.type }}</p>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="p-4 text-center">
+    <p class="text-gray-500">Loading product...</p>
+  </div>
+</ng-template>

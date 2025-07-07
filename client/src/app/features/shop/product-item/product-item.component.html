@@ -1,19 +1,22 @@
-<mat-card *ngIf="product" class="h-full flex flex-col justify-between">
-  <img
-    [src]="baseUrl + product.pictureUrl"
-    [alt]="'Image of ' + product.name"
-    class="w-full h-64 object-cover"
-    loading="lazy"
-    (error)="onImageError($event)"
-  />
-  <mat-card-content>
-    <h3 class="text-base font-semibold truncate">{{ product.name }}</h3>
-    <p class="text-xs text-gray-600">{{ product.price | currency }}</p>
-  </mat-card-content>
-  <mat-card-actions>
-    <button mat-stroked-button class="w-full">
-      <mat-icon>add_shopping_cart</mat-icon>
-      Add to Cart
-    </button>
-  </mat-card-actions>
-</mat-card>
+<a [routerLink]="['/shop', product.id]" class="block no-underline text-black">
+  <mat-card
+    *ngIf="product"
+    class="h-full flex flex-col justify-between cursor-pointer hover:shadow-lg transition-shadow duration-200"
+  >
+    <img
+      [src]="baseUrl + product.pictureUrl"
+      [alt]="'Image of ' + product.name"
+      class="w-full h-64 object-cover"
+      (error)="onImageError($event)"
+    />
+    <mat-card-content>
+      <h3 class="text-base font-semibold truncate">{{ product.name }}</h3>
+      <p class="text-xs text-gray-600">{{ product.price | currency }}</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-stroked-button class="w-full">
+        <mat-icon>add_shopping_cart</mat-icon> Add to Cart
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</a>
