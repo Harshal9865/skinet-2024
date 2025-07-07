@@ -1,0 +1,15 @@
+<div *ngIf="items.length; else empty">
+  <div *ngFor="let i of items">
+    <img [src]="i.product.pictureUrl" alt="{{i.product.name}}" width="80" />
+    <span>{{i.product.name}}</span>
+    <span>{{i.quantity}}</span>
+    <span>{{i.product.price | currency}}</span>
+    <button (click)="remove(i.product.id)">Delete</button>
+  </div>
+  <div>Subtotal: {{subtotal | currency}}</div>
+  <button routerLink="/">Continue shopping</button>
+  <button routerLink="/checkout" [disabled]="!items.length">
+    Checkout
+  </button>
+</div>
+<ng-template #empty><p>Your cart is empty.</p></ng-template>

@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Shop } from '../../core/services/shop';
+import { CartService } from '../cart/cart.service';
 import { Product } from '../../shared/models/product';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -33,6 +34,7 @@ export class ProductDetails implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private shopService: Shop,
+    private cart: CartService,
     private cdRef: ChangeDetectorRef
   ) {}
 
@@ -40,14 +42,14 @@ export class ProductDetails implements OnInit {
     const routeId = Number(this.route.snapshot.paramMap.get('id'));
     const navState = this.router.getCurrentNavigation()?.extras.state as { product?: Product };
 
-    // 👇 Step 1: Preload immediately if state is available
+    // Load product from navigation state if available
     if (navState?.product) {
       this.product = navState.product;
       this.loading = false;
-      this.cdRef.detectChanges(); // Force view update
+      this.cdRef.detectChanges();
     }
 
-    // 👇 Step 2: Otherwise fetch from API
+    // Otherwise fetch from API using ID
     if (!this.product && routeId) {
       this.shopService.getProduct(routeId).subscribe({
         next: res => {
@@ -64,8 +66,9 @@ export class ProductDetails implements OnInit {
   }
 
   addToCart(): void {
-    if (!this.product || this.quantity < 1) return;
-    console.log(`Added ${this.quantity} x ${this.product.name} to cart`);
-    // Add CartService logic here
+    if (!this.product) return;
+
+    const qty = Math.max(1, this.quantity); // Ensure at least 1
+    this.cart.addToCart(this.product, qty);
   }
 }
