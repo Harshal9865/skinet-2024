@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 import { ShopParams } from '../../shared/models/shopParams';
 import { Pagination } from '../../shared/models/pagination';
 import { finalize } from 'rxjs/operators';
+import { ProductItemComponent } from '../shop/product-item/product-item.component'; // ✅ Fixed path
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,7 +33,9 @@ import { NoItemsDialogComponent } from './no-items-dialog.component';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    ProductItemComponent, 
     MatProgressSpinnerModule,
+    MatPaginatorModule,
     MatDividerModule,
     MatListModule,
     MatMenuModule,
@@ -64,6 +68,15 @@ export class ShopComponent implements OnInit {
     this.shop.getTypes();
     this.loadProducts();
   }
+
+
+onPageChange(event: any): void {
+  this.shopParams.pageNumber = event.pageIndex + 1;
+  this.shopParams.pageSize = event.pageSize;
+  this.loadProducts();
+}
+
+
 
   loadProducts(): void {
     this.loading = true;

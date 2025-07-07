@@ -1,0 +1,28 @@
+footer {
+  a {
+    color: #cfcfff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      color: #ffffff;
+    }
+  }
+
+  h3 {
+    color: #ffffff;
+  }
+
+  .back-to-top {
+    cursor: pointer;
+    background: linear-gradient(to right, #5b21b6, #7c3aed); // Indigo → Violet
+    color: #ffffff;
+    text-align: center;
+    padding: 0.5rem 0;
+    transition: opacity 0.3s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
