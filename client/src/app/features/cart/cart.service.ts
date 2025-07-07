@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { Product } from '../../shared/models/product';
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private cart: { product: Product; quantity: number }[] = [];
+  private cart: CartItem[] = [];
+  private cartItemsSubject = new BehaviorSubject<CartItem[]>([]);
+  currentItems$ = this.cartItemsSubject.asObservable(); // ✅ Expose observable
 
   addToCart(product: Product, quantity: number = 1): void {
     const existing = this.cart.find(item => item.product.id === product.id);
@@ -14,19 +22,22 @@ export class CartService {
     } else {
       this.cart.push({ product, quantity });
     }
+    this.cartItemsSubject.next(this.cart); // ✅ Notify subscribers
     console.log(`🛒 Added to cart: ${quantity} x ${product.name}`);
   }
 
-  getCartItems() {
+  getCartItems(): CartItem[] {
     return this.cart;
   }
 
   removeItem(productId: number): void {
     this.cart = this.cart.filter(item => item.product.id !== productId);
+    this.cartItemsSubject.next(this.cart); // ✅ Notify
   }
 
   clearCart(): void {
     this.cart = [];
+    this.cartItemsSubject.next(this.cart); // ✅ Notify
   }
 
   getItemCount(): number {
