@@ -1,8 +1,6 @@
-<!-- profile.component.html -->
 <div class="profile-container">
   <h2>Your Profile</h2>
-  <p><strong>Name:</strong> {{ user.displayName }}</p>
-  <p><strong>Email:</strong> {{ user.email }}</p>
-  <p><strong>Roles:</strong> {{ user.roles.join(', ') }}</p>
-  <!-- Add form fields here to update profile if desired -->
+  <p><strong>Name:</strong> {{ user?.displayName }}</p>
+  <p><strong>Email:</strong> {{ user?.email }}</p>
+  <p><strong>Roles:</strong> {{ user?.roles?.join(', ') }}</p>
 </div>

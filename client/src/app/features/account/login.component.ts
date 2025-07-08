@@ -1,19 +1,32 @@
-import { Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+// src/app/features/account/login.component.ts
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Login } from '../../core/models/login';
 import { AccountService } from '../../core/services/account.service';
-import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSnackBarModule
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
-  loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
-  });
+export class LoginComponent implements OnInit {
+  loginForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -22,11 +35,28 @@ export class LoginComponent {
     private snack: MatSnackBar
   ) {}
 
-  submit() {
-    if (this.loginForm.invalid) return;
-    this.accountService.login(this.loginForm.value).subscribe({
-      next: () => this.router.navigate(['/']),
-      error: () => this.snack.open('Invalid login', 'Close', { duration: 2000 })
+  ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  submit(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    const credentials = this.loginForm.value as Login;
+    this.accountService.login(credentials).subscribe({
+      next: () => {
+        this.snack.open('Login successful', 'Close', { duration: 2000 });
+        this.router.navigateByUrl('/');
+      },
+      error: () => {
+        this.snack.open('Invalid login credentials', 'Close', { duration: 2500 });
+      }
     });
   }
 }
