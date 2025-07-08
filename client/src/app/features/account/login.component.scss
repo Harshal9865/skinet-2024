@@ -1,0 +1,38 @@
+.form-container {
+  max-width: 320px;
+  padding: 1.25rem; // smaller than p-6
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem; // text-sm
+}
+
+.form-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.input {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.btn {
+  font-size: 0.875rem;
+  padding: 0.4rem 0;
+  margin-top: 0.75rem;
+}
+
+.form-footer {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  text-align: center;
+
+  a {
+    color: #3b82f6;
+    text-decoration: underline;
+  }
+}

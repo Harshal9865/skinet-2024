@@ -14,16 +14,21 @@ export const routes: Routes = [
   { path: '', component: Home },
   { path: 'shop', component: ShopComponent },
   { path: 'shop/:id', component: ProductDetails },
-  { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
   { path: 'contact', component: ContactComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+ { path: 'cart', component: CartComponent }, 
+
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+
+  // Admin route (lazy-loaded)
   {
     path: 'admin',
     loadComponent: () =>
-      import('./features/admin/admin.component').then((m) => m.AdminComponent),
+      import('./features/admin/admin.component').then(m => m.AdminComponent),
     canActivate: [AdminGuard]
   },
+
+  // Fallback
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
