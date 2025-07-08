@@ -1,46 +1,98 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { Product } from '../../shared/models/product';
-
-export interface CartItem {
-  product: Product;
-  quantity: number;
-}
+import { Basket, BasketItem } from '../../shared/models/basket';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private cart: CartItem[] = [];
-  private cartItemsSubject = new BehaviorSubject<CartItem[]>([]);
-  currentItems$ = this.cartItemsSubject.asObservable(); // ✅ Expose observable
+  private basket: Basket | null = null;
+  private basketSource = new BehaviorSubject<Basket | null>(null);
+  basket$ = this.basketSource.asObservable();
 
-  addToCart(product: Product, quantity: number = 1): void {
-    const existing = this.cart.find(item => item.product.id === product.id);
-    if (existing) {
-      existing.quantity += quantity;
+  constructor(private http: HttpClient) {
+    const id = localStorage.getItem('basket_id');
+    if (id) this.getBasket(id);
+  }
+
+  private createBasket(): Basket {
+    const newBasket: Basket = { id: this.generateBasketId(), items: [] };
+    this.basket = newBasket;
+    this.basketSource.next(newBasket);
+    return newBasket;
+  }
+
+  private generateBasketId(): string {
+    const id = 'cart_' + Math.random().toString(36).substring(2);
+    localStorage.setItem('basket_id', id);
+    return id;
+  }
+
+  private setBasket(basket: Basket) {
+    this.basketSource.next(basket); // 👈 Instant UI update
+    this.http.post<Basket>(`https://localhost:5051/api/basket`, basket).subscribe({
+      next: updated => {
+        this.basket = updated;
+        this.basketSource.next(updated); // Optional: Sync latest from API
+      }
+    });
+  }
+
+  private getBasket(id: string) {
+    this.http.get<Basket>(`https://localhost:5051/api/basket/${id}`).subscribe({
+      next: basket => {
+        this.basket = basket;
+        this.basketSource.next(basket);
+      }
+    });
+  }
+
+  private getOrCreateBasket(): Basket {
+    if (this.basket) return this.basket;
+    const id = localStorage.getItem('basket_id');
+    if (id) return { id, items: [] };
+    return this.createBasket();
+  }
+
+  addToCart(product: Product, quantity = 1) {
+    const basket = this.getOrCreateBasket();
+    const index = basket.items.findIndex(i => i.productId === product.id);
+
+    if (index !== -1) {
+      basket.items[index].quantity += quantity;
     } else {
-      this.cart.push({ product, quantity });
+      basket.items.push({
+        productId: product.id,
+        quantity,
+        productName: product.name,
+        price: product.price,
+        pictureUrl: product.pictureUrl,
+        brand: product.brand,
+        type: product.type
+      });
     }
-    this.cartItemsSubject.next(this.cart); // ✅ Notify subscribers
-    console.log(`🛒 Added to cart: ${quantity} x ${product.name}`);
+
+    this.setBasket(basket);
   }
 
-  getCartItems(): CartItem[] {
-    return this.cart;
+  removeItem(productId: number) {
+    if (!this.basket) return;
+
+    const basket = { ...this.basket };
+    basket.items = basket.items.filter(i => i.productId !== productId);
+
+    this.setBasket(basket);
   }
 
-  removeItem(productId: number): void {
-    this.cart = this.cart.filter(item => item.product.id !== productId);
-    this.cartItemsSubject.next(this.cart); // ✅ Notify
-  }
-
-  clearCart(): void {
-    this.cart = [];
-    this.cartItemsSubject.next(this.cart); // ✅ Notify
-  }
-
-  getItemCount(): number {
-    return this.cart.reduce((total, item) => total + item.quantity, 0);
+  clearCart() {
+    const id = localStorage.getItem('basket_id');
+    if (!id) return;
+    this.http.delete(`https://localhost:5051/api/basket/${id}`).subscribe(() => {
+      this.basket = null;
+      this.basketSource.next(null);
+      localStorage.removeItem('basket_id');
+    });
   }
 }

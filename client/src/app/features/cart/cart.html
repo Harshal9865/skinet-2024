@@ -3,26 +3,24 @@
   <!-- Cart Items -->
   <div class="lg:col-span-2 space-y-6">
     <div *ngFor="let i of items" class="flex items-center justify-between p-4 border rounded shadow-sm">
-      <!-- Image & Name -->
       <div class="flex items-center gap-4">
         <img
-          [src]="baseUrl + i.product.pictureUrl"
-          [alt]="i.product.name"
+          [src]="baseUrl + i.pictureUrl"
+          [alt]="i.productName"
           class="w-20 h-20 object-cover rounded"
         />
         <div>
-          <h3 class="text-lg font-semibold">{{ i.product.name }}</h3>
+          <h3 class="text-lg font-semibold">{{ i.productName }}</h3>
           <p class="text-sm text-gray-500">Qty: {{ i.quantity }}</p>
         </div>
       </div>
 
-      <!-- Price & Delete -->
       <div class="flex items-center gap-4">
-        <p class="text-lg font-medium">{{ i.product.price | currency }}</p>
+        <p class="text-lg font-medium">{{ i.price | currency }}</p>
         <button
           mat-icon-button
           color="warn"
-          (click)="remove(i.product.id)"
+          (click)="remove(i.productId)"
           aria-label="Remove"
         >
           <mat-icon>delete</mat-icon>
@@ -31,7 +29,7 @@
     </div>
   </div>
 
-  <!-- Cart Summary -->
+  <!-- Summary -->
   <div class="p-6 border rounded shadow-md bg-gray-50 space-y-4">
     <h2 class="text-xl font-bold">Summary</h2>
     <p class="text-gray-700">
@@ -39,24 +37,9 @@
     </p>
 
     <div class="flex flex-col gap-4">
-      <button
-        mat-stroked-button
-        color="primary"
-        routerLink="/"
-        class="w-full"
-      >
-        Continue Shopping
-      </button>
+     <button mat-stroked-button color="primary" routerLink="/shop" class="w-full">Continue Shopping</button>
 
-      <button
-        mat-raised-button
-        color="accent"
-        routerLink="/checkout"
-        [disabled]="!items.length"
-        class="w-full"
-      >
-        Checkout
-      </button>
+      <button mat-raised-button color="accent" routerLink="/checkout" [disabled]="!items.length" class="w-full">Checkout</button>
     </div>
   </div>
 </div>
@@ -64,13 +47,6 @@
 <ng-template #empty>
   <div class="text-center py-20">
     <p class="text-xl text-gray-500">🛒 Your cart is empty.</p>
-    <button
-      mat-stroked-button
-      color="primary"
-      routerLink="/shop"
-      class="mt-4"
-    >
-      Browse Products
-    </button>
+    <button mat-stroked-button color="primary" routerLink="/shop" class="mt-4">Browse Products</button>
   </div>
 </ng-template>
