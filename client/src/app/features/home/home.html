@@ -1,12 +1,16 @@
 <!-- Hero Banner -->
 <div class="hero">
-  <img src="/assets/images/hero-banner.jpg" alt="Banner" class="banner" />
+  <img src="/images/hero1.jpg" alt="Hero Banner" class="banner" />
 </div>
 
-<!-- Categories Strip -->
+<!-- Product Categories -->
 <div class="categories">
-  <div class="category" *ngFor="let cat of ['Mobiles', 'Laptops', 'Fashion', 'Grocery', 'Toys']">
-    <a routerLink="/shop">{{ cat }}</a>
+  <div
+    class="category"
+    *ngFor="let cat of ['Boots', 'Gloves', 'Hats', 'Boards']"
+    (click)="onCategoryClick(cat)"
+  >
+    {{ cat }}
   </div>
 </div>
 
@@ -24,7 +28,8 @@
   </div>
 </section>
 
-<!-- Call to Action -->
+
+<!-- More Products CTA -->
 <div class="cta">
-  <a routerLink="/shop" class="shop-now">Shop Now</a>
+  <a routerLink="/shop" class="shop-now">Browse All Products</a>
 </div>

@@ -1,0 +1,8 @@
+.mat-icon-button {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.mat-icon-button:hover {
+  transform: scale(1.2);
+}

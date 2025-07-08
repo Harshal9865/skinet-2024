@@ -1,14 +1,14 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { Shop as ShopService } from '../../core/services/shop';
 import { Product } from '../../shared/models/product';
 import { environment } from '../../../environments/environment';
 import { ShopParams } from '../../shared/models/shopParams';
 import { Pagination } from '../../shared/models/pagination';
 import { finalize } from 'rxjs/operators';
-import { ProductItemComponent } from '../shop/product-item/product-item.component'; // ✅ Fixed path
+import { ProductItemComponent } from '../shop/product-item/product-item.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
-
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -33,7 +33,7 @@ import { NoItemsDialogComponent } from './no-items-dialog.component';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    ProductItemComponent, 
+    ProductItemComponent,
     MatProgressSpinnerModule,
     MatPaginatorModule,
     MatDividerModule,
@@ -52,16 +52,22 @@ export class ShopComponent implements OnInit {
   shop = inject(ShopService);
   dialog = inject(MatDialog);
   cdRef = inject(ChangeDetectorRef);
+  route = inject(ActivatedRoute);
 
   shopParams = new ShopParams();
   products: Product[] = [];
   pagination?: Pagination<Product>;
   loading = true;
   baseUrl = environment.apiUrl;
-
-  ngOnInit(): void {
+ngOnInit(): void {
+  this.route.queryParamMap.subscribe(params => {
+    const type = params.get('type');
+    if (type) {
+      this.shopParams.types = [type];
+    }
     this.initializeShop();
-  }
+  });
+}
 
   initializeShop(): void {
     this.shop.getBrands();
@@ -69,53 +75,40 @@ export class ShopComponent implements OnInit {
     this.loadProducts();
   }
 
-
-onPageChange(event: any): void {
-  this.shopParams.pageNumber = event.pageIndex + 1;
-  this.shopParams.pageSize = event.pageSize;
-  this.loadProducts();
-}
-
-
-
   loadProducts(): void {
     this.loading = true;
     this.shop.getProducts(this.shopParams)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: response => {
-          console.log('Loaded', response.data);
           this.products = response.data;
           this.pagination = response;
           this.cdRef.detectChanges();
+
           if (this.products.length === 0) {
             this.dialog.open(NoItemsDialogComponent, {
               width: '300px'
             });
           }
         },
-        error: error => {
-          console.error(error);
-        }
+        error: error => console.error(error)
       });
   }
 
   toggleBrand(brand: string): void {
-    if (this.shopParams.brands.includes(brand)) {
-      this.shopParams.brands = this.shopParams.brands.filter(b => b !== brand);
-    } else {
-      this.shopParams.brands.push(brand);
-    }
+    this.shopParams.brands = this.shopParams.brands.includes(brand)
+      ? this.shopParams.brands.filter(b => b !== brand)
+      : [...this.shopParams.brands, brand];
+
     this.shopParams.pageNumber = 1;
     this.loadProducts();
   }
 
   toggleType(type: string): void {
-    if (this.shopParams.types.includes(type)) {
-      this.shopParams.types = this.shopParams.types.filter(t => t !== type);
-    } else {
-      this.shopParams.types.push(type);
-    }
+    this.shopParams.types = this.shopParams.types.includes(type)
+      ? this.shopParams.types.filter(t => t !== type)
+      : [...this.shopParams.types, type];
+
     this.shopParams.pageNumber = 1;
     this.loadProducts();
   }
@@ -131,18 +124,9 @@ onPageChange(event: any): void {
   }
 
   searchProducts(term: string): void {
-    this.shopParams.search = term && term.trim() !== '' ? term.trim() : '';
+    this.shopParams.search = term.trim();
     this.shopParams.pageNumber = 1;
     this.loadProducts();
-  }
-
-  changePage(pageNumber: number): void {
-    if (this.pagination) {
-      if (pageNumber >= 1 && pageNumber <= this.totalPages) {
-        this.shopParams.pageNumber = pageNumber;
-        this.loadProducts();
-      }
-    }
   }
 
   onSearchInput(event: Event): void {
@@ -150,15 +134,25 @@ onPageChange(event: any): void {
     this.searchProducts(target.value);
   }
 
-  get isNextDisabled(): boolean {
-    return (
-      this.pagination !== undefined &&
-      this.shopParams.pageNumber >= this.totalPages
-    );
+  onPageChange(event: any): void {
+    this.shopParams.pageNumber = event.pageIndex + 1;
+    this.shopParams.pageSize = event.pageSize;
+    this.loadProducts();
+  }
+
+  changePage(pageNumber: number): void {
+    if (this.pagination && pageNumber >= 1 && pageNumber <= this.totalPages) {
+      this.shopParams.pageNumber = pageNumber;
+      this.loadProducts();
+    }
   }
 
   get totalPages(): number {
     return this.pagination ? Math.ceil(this.pagination.count / this.shopParams.pageSize) : 1;
+  }
+
+  get isNextDisabled(): boolean {
+    return this.pagination !== undefined && this.shopParams.pageNumber >= this.totalPages;
   }
 
   trackById(_index: number, product: Product): number {

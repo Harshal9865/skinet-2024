@@ -1,3 +1,4 @@
+// src/app/core/services/cart.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -31,29 +32,26 @@ export class CartService {
   }
 
   private setBasket(basket: Basket) {
-    this.basketSource.next(basket); // 👈 Instant UI update
-    this.http.post<Basket>(`https://localhost:5051/api/basket`, basket).subscribe({
-      next: updated => {
+    this.basketSource.next(basket);
+    this.http.post<Basket>(`https://localhost:5051/api/basket`, basket)
+      .subscribe(updated => {
         this.basket = updated;
-        this.basketSource.next(updated); // Optional: Sync latest from API
-      }
-    });
+        this.basketSource.next(updated);
+      });
   }
 
   private getBasket(id: string) {
-    this.http.get<Basket>(`https://localhost:5051/api/basket/${id}`).subscribe({
-      next: basket => {
+    this.http.get<Basket>(`https://localhost:5051/api/basket/${id}`)
+      .subscribe(basket => {
         this.basket = basket;
         this.basketSource.next(basket);
-      }
-    });
+      });
   }
 
   private getOrCreateBasket(): Basket {
     if (this.basket) return this.basket;
     const id = localStorage.getItem('basket_id');
-    if (id) return { id, items: [] };
-    return this.createBasket();
+    return id ? { id, items: [] } : this.createBasket();
   }
 
   addToCart(product: Product, quantity = 1) {
@@ -79,20 +77,18 @@ export class CartService {
 
   removeItem(productId: number) {
     if (!this.basket) return;
-
-    const basket = { ...this.basket };
-    basket.items = basket.items.filter(i => i.productId !== productId);
-
+    const basket = { ...this.basket, items: this.basket.items.filter(i => i.productId !== productId) };
     this.setBasket(basket);
   }
 
   clearCart() {
     const id = localStorage.getItem('basket_id');
     if (!id) return;
-    this.http.delete(`https://localhost:5051/api/basket/${id}`).subscribe(() => {
-      this.basket = null;
-      this.basketSource.next(null);
-      localStorage.removeItem('basket_id');
-    });
+    this.http.delete(`https://localhost:5051/api/basket/${id}`)
+      .subscribe(() => {
+        this.basket = null;
+        this.basketSource.next(null);
+        localStorage.removeItem('basket_id');
+      });
   }
 }

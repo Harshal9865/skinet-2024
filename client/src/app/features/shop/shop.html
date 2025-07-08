@@ -1,26 +1,28 @@
 <div class="flex flex-col gap-3 px-4 py-2">
   <div class="flex justify-between items-center gap-2 flex-wrap">
+    <!-- Active Filters -->
     <div class="flex flex-wrap gap-2 max-w-full">
       <div class="active-filters">
-  <button
-    *ngFor="let brand of shopParams.brands"
-    mat-stroked-button
-    color=""
-    disabled
-  >
-    {{ brand }}
-  </button>
-  <button
-    *ngFor="let type of shopParams.types"
-    mat-stroked-button
-    color=""
-    disabled
-  >
-    {{ type }}
-  </button>
-</div>
-
+        <button
+          *ngFor="let brand of shopParams.brands"
+          mat-stroked-button
+          color=""
+          disabled
+        >
+          {{ brand }}
+        </button>
+        <button
+          *ngFor="let type of shopParams.types"
+          mat-stroked-button
+          color=""
+          disabled
+        >
+          {{ type }}
+        </button>
+      </div>
     </div>
+
+    <!-- Filter/Sort/Clear Buttons -->
     <div class="flex justify-end gap-2">
       <button mat-stroked-button [matMenuTriggerFor]="filterMenu">
         <mat-icon>filter_list</mat-icon> Filter
@@ -105,9 +107,6 @@
   </mat-radio-group>
 </mat-menu>
 
-
-
-
 <!-- Product Grid -->
 <div
   class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 my-6 px-4"
@@ -119,10 +118,7 @@
   ></app-product-item>
 </div>
 
-
-
-
-<!-- Material Paginator -->
+<!-- Paginator -->
 <div class="flex justify-end px-4 mt-4">
   <mat-paginator
     [length]="pagination?.count || 0"
@@ -134,4 +130,3 @@
   >
   </mat-paginator>
 </div>
-

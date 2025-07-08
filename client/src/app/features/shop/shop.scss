@@ -19,13 +19,20 @@
 
   button {
     font-size: 0.85rem;
-    border-color: indigo;
-    color: white;
-    background: rgb(158, 102, 198);
     text-transform: none;
     padding: 0.25rem 0.75rem;
+    border: none;
+    color: rgb(255, 255, 255);
+    background-color: rgb(97, 26, 220);
+    transition: background-color 0.2s ease-in-out;
+
+    &:hover {
+      background-color: rgb(59 130 246); // solid blue on hover
+    }
   }
 }
+
+
 
 .action-buttons {
   display: flex;
