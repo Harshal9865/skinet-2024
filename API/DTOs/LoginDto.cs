@@ -1,9 +1,8 @@
-
-// Core/Entities/DTOs/LoginDto.cs
-namespace Core.Entities.DTOs
+namespace API.DTOs
 {
-  public class LoginDto
-  {
-    public string Email { get; set; }
-    public string Password { get; set; }
-  }
+    public class LoginDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}

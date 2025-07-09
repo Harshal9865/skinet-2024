@@ -6,6 +6,7 @@
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a routerLink="/shop" routerLinkActive="active">Shop</a>
       <a routerLink="/contact" routerLinkActive="active">Contact</a>
+      <a *ngIf="currentUser?.roles?.includes('Admin')" routerLink="/admin" routerLinkActive="active">Admin</a>
     </nav>
 
     <div class="flex gap-3 items-center">
@@ -20,15 +21,14 @@
         <mat-icon>shopping_cart</mat-icon>
       </a>
 
-      <!-- ✅ Not logged in -->
       <ng-container *ngIf="!currentUser">
         <button mat-stroked-button routerLink="/login">Login</button>
         <button mat-stroked-button routerLink="/register">Register</button>
       </ng-container>
 
-      <!-- ✅ Logged in -->
       <ng-container *ngIf="currentUser">
         <span class="text-sm font-medium">Welcome, {{ currentUser.displayName }}</span>
+        <a routerLink="/profile" class="text-sm text-blue-600 underline">Profile</a>
         <button mat-stroked-button (click)="logout()">Logout</button>
       </ng-container>
     </div>

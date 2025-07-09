@@ -1,4 +1,3 @@
-using System;
 using System.Linq.Expressions;
 using Core.Interfaces;
 
@@ -14,12 +13,22 @@ namespace Core.Specifications
         protected BaseSpecification() : this(null) { }
 
         public Expression<Func<T, bool>>? Criteria { get; }
+
+       
+        public List<Expression<Func<T, object>>> Includes { get; } = new();
+
         public Expression<Func<T, object>>? OrderBy { get; private set; }
         public Expression<Func<T, object>>? OrderByDescending { get; private set; }
+
         public bool IsDistinct { get; private set; }
         public int Take { get; private set; }
         public int Skip { get; private set; }
         public bool IsPagingEnabled { get; private set; } = false;
+
+        protected void AddInclude(Expression<Func<T, object>> includeExpression)
+        {
+            Includes.Add(includeExpression);
+        }
 
         protected void AddOrderBy(Expression<Func<T, object>> orderByExpression)
         {
@@ -51,7 +60,7 @@ namespace Core.Specifications
         {
         }
 
-        protected BaseSpecification() : base() {}
+        protected BaseSpecification() : base() { }
 
         public Expression<Func<T, TResult>>? Select { get; private set; }
 

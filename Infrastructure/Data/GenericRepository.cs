@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +18,11 @@ namespace Infrastructure.Data
             _context.Set<T>().Add(entity);
         }
 
-       public async Task<int> CountAsync(ISpecification<T> spec)
-{
-    var query = SpecificationEvaluator<T>.GetQuery(_context.Set<T>().AsQueryable(), spec);
-    return await query.CountAsync();
-}
-
+        public async Task<int> CountAsync(ISpecification<T> spec)
+        {
+            var query = SpecificationEvaluator<T>.GetQuery(_context.Set<T>().AsQueryable(), spec);
+            return await query.CountAsync();
+        }
 
         public bool Exists(int id)
         {
@@ -45,7 +41,7 @@ namespace Infrastructure.Data
 
         public async Task<TResult?> GetEntityWithSpec<TResult>(ISpecification<T, TResult> spec)
         {
-            return await ApplySpecification<TResult>(spec).FirstOrDefaultAsync();
+            return await ApplySpecification(spec).FirstOrDefaultAsync();
         }
 
         public async Task<IReadOnlyList<T>> ListAllAsync()
@@ -60,7 +56,7 @@ namespace Infrastructure.Data
 
         public async Task<IReadOnlyList<TResult>> ListAsync<TResult>(ISpecification<T, TResult> spec)
         {
-            return await ApplySpecification<TResult>(spec).ToListAsync();
+            return await ApplySpecification(spec).ToListAsync();
         }
 
         public void Remove(T entity)
@@ -86,7 +82,7 @@ namespace Infrastructure.Data
 
         private IQueryable<TResult> ApplySpecification<TResult>(ISpecification<T, TResult> spec)
         {
-            return SpecificationEvaluator<T>.GetQuery<TResult>(_context.Set<T>().AsQueryable(), spec);
+            return SpecificationEvaluator<T>.GetQuery(_context.Set<T>().AsQueryable(), spec);
         }
     }
 }

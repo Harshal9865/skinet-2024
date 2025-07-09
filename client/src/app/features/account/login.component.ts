@@ -1,7 +1,7 @@
 // src/app/features/account/login.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -32,6 +32,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private accountService: AccountService,
     private router: Router,
+    private route: ActivatedRoute, // ✅ FIXED
     private snack: MatSnackBar
   ) {}
 
@@ -52,7 +53,8 @@ export class LoginComponent implements OnInit {
     this.accountService.login(credentials).subscribe({
       next: () => {
         this.snack.open('Login successful', 'Close', { duration: 2000 });
-        this.router.navigateByUrl('/');
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        this.router.navigateByUrl(returnUrl);
       },
       error: () => {
         this.snack.open('Invalid login credentials', 'Close', { duration: 2500 });

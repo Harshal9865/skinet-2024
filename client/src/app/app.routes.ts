@@ -9,11 +9,12 @@ import { RegisterComponent } from './features/account/register.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { AuthGuard } from './core/services/guards/auth.guard';
 import { AdminGuard } from './core/services/guards/admin.guard';
-
+import { CheckoutComponent } from './features/checkout/checkout.component';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'shop', component: ShopComponent },
   { path: 'shop/:id', component: ProductDetails },
+  { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard] },
   { path: 'contact', component: ContactComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },

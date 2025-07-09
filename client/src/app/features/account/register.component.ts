@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatError } from '@angular/material/form-field'; // Optional: resolves Angular Material template errors
 
 import { AccountService } from '../../core/services/account.service';
 import { Register } from '../../core/models/register';
@@ -69,7 +68,8 @@ export class RegisterComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -81,16 +81,17 @@ export class RegisterComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.registerForm.invalid) return;
+  if (this.registerForm.invalid) return;
 
-    const value = this.registerForm.value as Register;
-    this.accountService.register(value).subscribe({
-      next: () => {
-        console.log('Registration successful');
-      },
-      error: (err: unknown) => {
-        console.error('Registration failed', err);
-      }
-    });
-  }
+  const value = this.registerForm.value as Register;
+  this.accountService.register(value).subscribe({
+    next: () => {
+      this.router.navigateByUrl('/checkout');
+    },
+    error: err => {
+      console.error('Registration failed', err);
+    }
+  });
+}
+
 }

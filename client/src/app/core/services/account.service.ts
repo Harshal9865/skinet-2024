@@ -9,8 +9,13 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
-  public currentUserSource = new BehaviorSubject<User | null>(null);
+  private currentUserSource = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSource.asObservable();
+
+get currentUserValue(): User | null {
+  return this.currentUserSource.value;
+}
+
 
   constructor(private http: HttpClient) {
     this.loadUser();
@@ -20,17 +25,19 @@ export class AccountService {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     if (token && user) {
-      const userObj = JSON.parse(user);
-      this.currentUserSource.next(userObj);
+      try {
+        const userObj = JSON.parse(user);
+        this.currentUserSource.next(userObj);
+      } catch {
+        this.logout(); // Cleanup if corrupted
+      }
     }
   }
 
   login(dto: Login) {
     return this.http.post<User>(`${environment.apiUrl}/account/login`, dto).pipe(
       map(user => {
-        localStorage.setItem('token', user.token);
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUserSource.next(user);
+        this.storeUser(user);
         return user;
       })
     );
@@ -39,9 +46,7 @@ export class AccountService {
   register(dto: Register) {
     return this.http.post<User>(`${environment.apiUrl}/account/register`, dto).pipe(
       map(user => {
-        localStorage.setItem('token', user.token);
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUserSource.next(user);
+        this.storeUser(user);
         return user;
       })
     );
@@ -53,8 +58,14 @@ export class AccountService {
     this.currentUserSource.next(null);
   }
 
-  get isAdmin() {
+  get isAdmin(): boolean {
     const user = this.currentUserSource.value;
     return user?.roles.includes('Admin') ?? false;
+  }
+
+  private storeUser(user: User) {
+    localStorage.setItem('token', user.token);
+    localStorage.setItem('user', JSON.stringify(user));
+    this.currentUserSource.next(user);
   }
 }

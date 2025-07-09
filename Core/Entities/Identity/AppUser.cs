@@ -4,7 +4,6 @@ namespace Core.Entities.Identity
 {
     public class AppUser : IdentityUser
     {
-        // Add any custom properties here
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
     }
 }

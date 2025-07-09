@@ -1,6 +1,6 @@
-using System.Linq;
 using Core.Entities;
 using Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
@@ -10,24 +10,7 @@ namespace Infrastructure.Data
             IQueryable<T> inputQuery,
             ISpecification<T, TResult> spec)
         {
-            var query = inputQuery;
-
-            if (spec.Criteria != null)
-                query = query.Where(spec.Criteria);
-
-            if (spec.OrderBy != null)
-                query = query.OrderBy(spec.OrderBy);
-
-            if (spec.OrderByDescending != null)
-                query = query.OrderByDescending(spec.OrderByDescending);
-
-            if (spec.IsDistinct)
-                query = query.Distinct();
-
-            if (spec.IsPagingEnabled)
-            {
-                query = query.Skip(spec.Skip).Take(spec.Take);
-            }
+            var query = ApplyBaseQuery(inputQuery, spec);
 
             if (spec.Select != null)
             {
@@ -41,10 +24,17 @@ namespace Infrastructure.Data
             IQueryable<T> inputQuery,
             ISpecification<T> spec)
         {
-            var query = inputQuery;
+            return ApplyBaseQuery(inputQuery, spec);
+        }
 
+        // ✅ Shared logic for both overloads
+        private static IQueryable<T> ApplyBaseQuery(IQueryable<T> query, ISpecification<T> spec)
+        {
             if (spec.Criteria != null)
                 query = query.Where(spec.Criteria);
+
+            foreach (var include in spec.Includes)
+                query = query.Include(include);
 
             if (spec.OrderBy != null)
                 query = query.OrderBy(spec.OrderBy);
@@ -56,9 +46,7 @@ namespace Infrastructure.Data
                 query = query.Distinct();
 
             if (spec.IsPagingEnabled)
-            {
                 query = query.Skip(spec.Skip).Take(spec.Take);
-            }
 
             return query;
         }
