@@ -1,6 +1,6 @@
 <header class="border-b p-3 w-full">
   <div class="flex items-center justify-between max-w-screen-2xl mx-auto">
-    <img routerLink="/" src="/images/logo.png" alt="app logo" class="max-h-16" />
+    <img routerLink="/" src="/images/myylogo.png" alt="app logo" class="max-h-16" />
 
     <nav class="flex gap-3 my-2 uppercase text-2xl">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
@@ -30,7 +30,7 @@
         <button mat-button [matMenuTriggerFor]="userMenu">{{ currentUser.email }}</button>
         <mat-menu #userMenu="matMenu">
           <button mat-menu-item routerLink="/profile">Profile</button>
-          <button mat-menu-item routerLink="/orders">Order History</button>
+          <button mat-menu-item routerLink="/orders">Your Orders </button>
           <button mat-menu-item (click)="logout()">Logout</button>
         </mat-menu>
       </ng-container>
