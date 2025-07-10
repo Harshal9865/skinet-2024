@@ -5,11 +5,12 @@
     class="block no-underline text-black"
   >
     <img
-      [src]="baseUrl + product.pictureUrl"
-      [alt]="'Image of ' + product.name"
-      class="w-full h-64 object-cover"
-      (error)="onImageError($event)"
-    />
+  [src]="product.pictureUrl"
+  (error)="onImageError($event)"
+  alt="Image of {{ product.name }}"
+  class="w-full h-64 object-cover"
+/>
+
   </a>
 
   <mat-card-content>

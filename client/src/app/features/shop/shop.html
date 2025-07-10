@@ -3,22 +3,13 @@
     <!-- Active Filters -->
     <div class="flex flex-wrap gap-2 max-w-full">
       <div class="active-filters">
-        <button
-          *ngFor="let brand of shopParams.brands"
-          mat-stroked-button
-          color=""
-          disabled
-        >
-          {{ brand }}
-        </button>
-        <button
-          *ngFor="let type of shopParams.types"
-          mat-stroked-button
-          color=""
-          disabled
-        >
-          {{ type }}
-        </button>
+        <!-- Filter Chips -->
+        <ng-container *ngFor="let brand of shopParams.brands">
+          <mat-chip class="brand-chip" selected>{{ brand }}</mat-chip>
+        </ng-container>
+        <ng-container *ngFor="let type of shopParams.types">
+          <mat-chip class="type-chip" selected>{{ type }}</mat-chip>
+        </ng-container>
       </div>
     </div>
 
@@ -53,8 +44,8 @@
 </div>
 
 <!-- Filter menu -->
-<mat-menu #filterMenu="matMenu" class="p-2 w-[400px]">
-  <div class="flex flex-col gap-4">
+<mat-menu #filterMenu="matMenu" class="p-2 w-[400px]" xPosition="before" yPosition="below">
+  <div class="flex flex-col gap-4 max-w-[90vw]">
     <div>
       <h4 class="text-primary font-semibold mb-2">Brands</h4>
       <mat-selection-list>
@@ -84,7 +75,7 @@
 </mat-menu>
 
 <!-- Sort menu -->
-<mat-menu #sortMenu="matMenu">
+<mat-menu #sortMenu="matMenu" xPosition="before" yPosition="below">
   <button mat-menu-item (click)="changeSort('alpha')">
     <mat-icon>sort_by_alpha</mat-icon> Name A-Z
   </button>
@@ -100,7 +91,7 @@
 </mat-menu>
 
 <!-- Confirm Clear -->
-<mat-menu #confirmClearMenu="matMenu">
+<mat-menu #confirmClearMenu="matMenu" xPosition="before" yPosition="below">
   <mat-radio-group>
     <mat-radio-button (click)="clearFilters()">Yes, Clear All</mat-radio-button>
     <mat-radio-button>No</mat-radio-button>

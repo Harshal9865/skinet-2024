@@ -23,6 +23,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { NoItemsDialogComponent } from './no-items-dialog.component';
+import { forkJoin } from 'rxjs';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-shop',
@@ -39,6 +41,7 @@ import { NoItemsDialogComponent } from './no-items-dialog.component';
     MatDividerModule,
     MatListModule,
     MatMenuModule,
+    MatChipsModule ,
     MatRadioModule,
     MatFormFieldModule,
     MatInputModule,
@@ -59,21 +62,34 @@ export class ShopComponent implements OnInit {
   pagination?: Pagination<Product>;
   loading = true;
   baseUrl = environment.apiUrl;
-ngOnInit(): void {
-  this.route.queryParamMap.subscribe(params => {
-    const type = params.get('type');
-    if (type) {
-      this.shopParams.types = [type];
+
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      const type = params.get('type');
+      if (type) {
+        this.shopParams.types = [type];
+      }
+      this.initializeShop();
+    });
+  }
+
+  initializeShop(): void {
+  forkJoin([
+    this.shop.getBrands(),
+    this.shop.getTypes()
+  ]).subscribe({
+    next: ([brands, types]) => {
+      this.shop.brands = brands;   // ✅ set data
+      this.shop.types = types;     // ✅ set data
+      this.loadProducts();
+    },
+    error: err => {
+      console.error('Error loading brands/types', err);
+      this.loadProducts(); // Load products even if filters fail
     }
-    this.initializeShop();
   });
 }
 
-  initializeShop(): void {
-    this.shop.getBrands();
-    this.shop.getTypes();
-    this.loadProducts();
-  }
 
   loadProducts(): void {
     this.loading = true;

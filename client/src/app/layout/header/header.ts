@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatMenuModule } from '@angular/material/menu';
 import {
   RouterLink,
   RouterLinkActive,
@@ -29,6 +30,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatBadgeModule,
     MatButtonModule,
     MatProgressBarModule,
+    MatMenuModule,
     RouterLinkActive,
     RouterLink
   ],
@@ -43,7 +45,7 @@ export class Header {
   private cartService = inject(CartService);
   private accountService = inject(AccountService);
   private cdRef = inject(ChangeDetectorRef);
-  private router = inject(Router);
+  public router = inject(Router); // 👈 needs to be public for template binding
 
   constructor() {
     this.cartService.basket$

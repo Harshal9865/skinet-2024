@@ -13,7 +13,7 @@ import { ShopParams } from '../../shared/models/shopParams';
 })
 export class Shop {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/api`;
+  private baseUrl = `${environment.apiUrl}`;
 
   brands: string[] = [];
   types: string[] = [];
@@ -60,21 +60,23 @@ export class Shop {
     );
   }
 
-  getBrands(): void {
-    if (this.brands.length > 0) return;
+ getBrands(): Observable<string[]> {
+  return this.http.get<string[]>(`${this.baseUrl}/products/brands`).pipe(
+    catchError(err => {
+      console.error('Error fetching brands', err);
+      return of([]);
+    })
+  );
+}
 
-    this.http.get<string[]>(`${this.baseUrl}/products/brands`).subscribe({
-      next: response => (this.brands = response),
-      error: error => console.error('Error fetching brands:', error)
-    });
-  }
+getTypes(): Observable<string[]> {
+  return this.http.get<string[]>(`${this.baseUrl}/products/types`).pipe(
+    catchError(err => {
+      console.error('Error fetching types', err);
+      return of([]);
+    })
+  );
 
-  getTypes(): void {
-    if (this.types.length > 0) return;
+}
 
-    this.http.get<string[]>(`${this.baseUrl}/products/types`).subscribe({
-      next: response => (this.types = response),
-      error: error => console.error('Error fetching types:', error)
-    });
-  }
 }

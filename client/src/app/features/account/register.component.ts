@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,48 +20,8 @@ import { Register } from '../../core/models/register';
     MatInputModule,
     MatButtonModule
   ],
-  template: `
-    <form [formGroup]="registerForm" (ngSubmit)="submit()" class="max-w-md mx-auto mt-8 space-y-4">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Display Name</mat-label>
-        <input matInput formControlName="displayName" />
-        <mat-error *ngIf="registerForm.get('displayName')?.hasError('required')">
-          Display Name is required
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" />
-        <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
-          Email is required
-        </mat-error>
-        <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
-          Enter a valid email address
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Password</mat-label>
-        <input matInput formControlName="password" type="password" />
-        <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-          Password is required
-        </mat-error>
-        <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
-          Password must be at least 6 characters
-        </mat-error>
-      </mat-form-field>
-
-      <button mat-raised-button color="primary" class="w-full" [disabled]="registerForm.invalid">
-        Register
-      </button>
-    </form>
-  `,
-  styles: [`
-    .mat-form-field {
-      margin-bottom: 16px;
-    }
-  `]
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
@@ -69,7 +29,8 @@ export class RegisterComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private accountService: AccountService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -81,17 +42,17 @@ export class RegisterComponent implements OnInit {
   }
 
   submit(): void {
-  if (this.registerForm.invalid) return;
+    if (this.registerForm.invalid) return;
 
-  const value = this.registerForm.value as Register;
-  this.accountService.register(value).subscribe({
-    next: () => {
-      this.router.navigateByUrl('/checkout');
-    },
-    error: err => {
-      console.error('Registration failed', err);
-    }
-  });
-}
-
+    const value = this.registerForm.value as Register;
+    this.accountService.register(value).subscribe({
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: err => {
+        console.error('Registration failed', err);
+      }
+    });
+  }
 }

@@ -22,14 +22,17 @@
       </a>
 
       <ng-container *ngIf="!currentUser">
-        <button mat-stroked-button routerLink="/login">Login</button>
-        <button mat-stroked-button routerLink="/register">Register</button>
+        <button mat-stroked-button [routerLink]="['/login']" [queryParams]="{ returnUrl: router.url }">Login</button>
+        <button mat-stroked-button [routerLink]="['/register']" [queryParams]="{ returnUrl: router.url }">Register</button>
       </ng-container>
 
       <ng-container *ngIf="currentUser">
-        <span class="text-sm font-medium">Welcome, {{ currentUser.displayName }}</span>
-        <a routerLink="/profile" class="text-sm text-blue-600 underline">Profile</a>
-        <button mat-stroked-button (click)="logout()">Logout</button>
+        <button mat-button [matMenuTriggerFor]="userMenu">{{ currentUser.email }}</button>
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item routerLink="/profile">Profile</button>
+          <button mat-menu-item routerLink="/orders">Order History</button>
+          <button mat-menu-item (click)="logout()">Logout</button>
+        </mat-menu>
       </ng-container>
     </div>
   </div>
