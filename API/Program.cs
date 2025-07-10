@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 
 using System.Text;
 using Infrastructure.Services;
+using API.RequestHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,7 @@ builder.Services.AddDbContext<AppIdentityDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
+builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
 // Register repositories and services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

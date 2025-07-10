@@ -1,11 +1,11 @@
 using API.Dtos;
+using API.DTOs;
+using AutoMapper;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -13,14 +13,16 @@ namespace API.Controllers
     public class OrdersController : BaseApiController
     {
         private readonly IOrderService _orderService;
+        private readonly IMapper _mapper;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, IMapper mapper)
         {
             _orderService = orderService;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder(OrderDto orderDto)
+        public async Task<ActionResult<OrderToReturnDto>> CreateOrder(OrderDto orderDto)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email)) return Unauthorized("User email not found.");
@@ -40,16 +42,19 @@ namespace API.Controllers
 
             if (order == null) return BadRequest("Problem creating order");
 
-            return Ok(order);
+            return Ok(_mapper.Map<Order, OrderToReturnDto>(order));
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Order>>> GetOrdersForUser()
+        public async Task<ActionResult<IReadOnlyList<OrderToReturnDto>>> GetOrdersForUser()
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email)) return Unauthorized("User email not found.");
 
-            return Ok(await _orderService.GetOrdersForUserAsync(email));
+            var orders = await _orderService.GetOrdersForUserAsync(email);
+            var mappedOrders = _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders);
+
+            return Ok(mappedOrders);
         }
     }
 }
