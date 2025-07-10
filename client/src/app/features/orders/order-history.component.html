@@ -1,0 +1,40 @@
+<div class="orders-container">
+  <h2 class="orders-title">Your Orders</h2>
+
+  <!-- Error Message -->
+  <div *ngIf="error()" class="error-message" role="alert">
+    {{ error() }}
+  </div>
+
+  <!-- No Orders -->
+  <div *ngIf="orders().length === 0 && !error()" class="no-orders">
+    No orders found.
+  </div>
+
+  <!-- Orders List -->
+  <div *ngFor="let order of orders()" class="order-card">
+    <div class="order-header">
+      <div class="order-info">
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Order Date:</strong> {{ order.orderDate | date: 'mediumDate' }}</p>
+        <p><strong>Status:</strong> <span class="status">{{ order.status }}</span></p>
+      </div>
+      <div class="delivery-info">
+        <p><strong>Delivery:</strong> {{ order.deliveryMethod }}</p>
+        <p><strong>Shipping:</strong> ₹{{ order.shippingPrice }}</p>
+        <p><strong>Total:</strong> ₹{{ order.total }}</p>
+      </div>
+    </div>
+
+    <div class="order-items">
+      <div *ngFor="let item of order.orderItems" class="order-item">
+        <img [src]="item.pictureUrl" [alt]="item.productName" class="product-img" />
+        <div class="product-info">
+          <p class="product-name">{{ item.productName }}</p>
+          <p class="product-qty">Qty: {{ item.quantity }}</p>
+        </div>
+        <div class="product-price">₹{{ item.price }}</div>
+      </div>
+    </div>
+  </div>
+</div>

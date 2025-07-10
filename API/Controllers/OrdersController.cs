@@ -3,14 +3,13 @@ using API.DTOs;
 using AutoMapper;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace API.Controllers
 {
-    [Authorize]
-    public class OrdersController : BaseApiController
+    [ApiController]
+    [Route("api/[controller]")]
+    public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
@@ -22,39 +21,44 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrderToReturnDto>> CreateOrder(OrderDto orderDto)
+        public async Task<ActionResult<OrderToReturnDto>> CreateOrder([FromBody] OrderDto orderDto)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(email)) return Unauthorized("User email not found.");
+            if (string.IsNullOrWhiteSpace(orderDto.Email))
+                return BadRequest("Email is required.");
 
-            if (string.IsNullOrEmpty(orderDto.BasketId))
+            if (string.IsNullOrWhiteSpace(orderDto.BasketId))
                 return BadRequest("Basket ID is required.");
 
             if (orderDto.ShippingAddress == null)
                 return BadRequest("Shipping address is required.");
 
+            // 🔁 Map AddressDto to Address (domain)
+            var shippingAddress = _mapper.Map<Address>(orderDto.ShippingAddress);
+
             var order = await _orderService.CreateOrderAsync(
-                email,
+                orderDto.Email,
                 orderDto.DeliveryMethodId,
                 orderDto.BasketId,
-                orderDto.ShippingAddress
+                shippingAddress
             );
 
-            if (order == null) return BadRequest("Problem creating order");
+            if (order == null)
+                return BadRequest("Problem creating order");
 
-            return Ok(_mapper.Map<Order, OrderToReturnDto>(order));
+            var result = _mapper.Map<OrderToReturnDto>(order);
+            return Ok(result);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<OrderToReturnDto>>> GetOrdersForUser()
+        public async Task<ActionResult<IReadOnlyList<OrderToReturnDto>>> GetOrdersForUser([FromQuery] string email)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(email)) return Unauthorized("User email not found.");
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest("Email is required.");
 
             var orders = await _orderService.GetOrdersForUserAsync(email);
-            var mappedOrders = _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders);
+            var result = _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders);
 
-            return Ok(mappedOrders);
+            return Ok(result);
         }
     }
 }

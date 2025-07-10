@@ -9,31 +9,36 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
+  private readonly storageKeyToken = 'token';
+  private readonly storageKeyUser = 'user';
+
   private currentUserSource = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSource.asObservable();
 
-get currentUserValue(): User | null {
-  return this.currentUserSource.value;
-}
-
-
   constructor(private http: HttpClient) {
-    this.loadUser();
+    this.loadUserFromStorage();
   }
 
-  loadUser() {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    if (token && user) {
+  get currentUserValue(): User | null {
+    return this.currentUserSource.value;
+  }
+
+  // Load user from localStorage on app start
+  private loadUserFromStorage(): void {
+    const token = localStorage.getItem(this.storageKeyToken);
+    const userJson = localStorage.getItem(this.storageKeyUser);
+
+    if (token && userJson) {
       try {
-        const userObj = JSON.parse(user);
-        this.currentUserSource.next(userObj);
+        const user = JSON.parse(userJson) as User;
+        this.currentUserSource.next(user);
       } catch {
-        this.logout(); // Cleanup if corrupted
+        this.logout(); // Clear corrupted data
       }
     }
   }
 
+  // Log in and store user
   login(dto: Login) {
     return this.http.post<User>(`${environment.apiUrl}/account/login`, dto).pipe(
       map(user => {
@@ -43,6 +48,7 @@ get currentUserValue(): User | null {
     );
   }
 
+  // Register and store user
   register(dto: Register) {
     return this.http.post<User>(`${environment.apiUrl}/account/register`, dto).pipe(
       map(user => {
@@ -52,20 +58,23 @@ get currentUserValue(): User | null {
     );
   }
 
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  // Logout and clear storage
+  logout(): void {
+    localStorage.removeItem(this.storageKeyToken);
+    localStorage.removeItem(this.storageKeyUser);
     this.currentUserSource.next(null);
   }
 
+  // Check if user has admin role
   get isAdmin(): boolean {
-    const user = this.currentUserSource.value;
-    return user?.roles.includes('Admin') ?? false;
+    const user = this.currentUserValue;
+    return user?.roles?.includes('Admin') ?? false;
   }
 
-  private storeUser(user: User) {
-    localStorage.setItem('token', user.token);
-    localStorage.setItem('user', JSON.stringify(user));
+  // Save token + user to localStorage
+  private storeUser(user: User): void {
+    localStorage.setItem(this.storageKeyToken, user.token);
+    localStorage.setItem(this.storageKeyUser, JSON.stringify(user));
     this.currentUserSource.next(user);
   }
 }

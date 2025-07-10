@@ -6,12 +6,12 @@
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a routerLink="/shop" routerLinkActive="active">Shop</a>
       <a routerLink="/contact" routerLinkActive="active">Contact</a>
-      <a *ngIf="currentUser?.roles?.includes('Admin')" routerLink="/admin" routerLinkActive="active">Admin</a>
+      <a *ngIf="currentUser()?.roles?.includes('Admin')" routerLink="/admin" routerLinkActive="active">Admin</a>
     </nav>
 
     <div class="flex gap-3 items-center">
       <a
-        matBadge="{{ itemCount }}"
+        matBadge="{{ itemCount() }}"
         matBadgeSize="large"
         class="custom-badge"
         routerLink="/cart"
@@ -21,21 +21,21 @@
         <mat-icon>shopping_cart</mat-icon>
       </a>
 
-      <ng-container *ngIf="!currentUser">
-        <button mat-stroked-button [routerLink]="['/login']" [queryParams]="{ returnUrl: router.url }">Login</button>
-        <button mat-stroked-button [routerLink]="['/register']" [queryParams]="{ returnUrl: router.url }">Register</button>
+      <ng-container *ngIf="!currentUser()">
+        <button mat-stroked-button [routerLink]="['/login']" [queryParams]="{ returnUrl: currentUrl }">Login</button>
+        <button mat-stroked-button [routerLink]="['/register']" [queryParams]="{ returnUrl: currentUrl }">Register</button>
       </ng-container>
 
-      <ng-container *ngIf="currentUser">
-        <button mat-button [matMenuTriggerFor]="userMenu">{{ currentUser.email }}</button>
+      <ng-container *ngIf="currentUser()">
+        <button mat-button [matMenuTriggerFor]="userMenu">{{ currentUser()?.email }}</button>
         <mat-menu #userMenu="matMenu">
           <button mat-menu-item routerLink="/profile">Profile</button>
-          <button mat-menu-item routerLink="/orders">Your Orders </button>
+          <button mat-menu-item routerLink="/orders">Your Orders</button>
           <button mat-menu-item (click)="logout()">Logout</button>
         </mat-menu>
       </ng-container>
     </div>
   </div>
 
-  <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="primary"></mat-progress-bar>
+  <mat-progress-bar *ngIf="isLoading()" mode="indeterminate" color="primary"></mat-progress-bar>
 </header>

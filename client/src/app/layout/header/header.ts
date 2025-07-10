@@ -1,29 +1,36 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  computed,
+  effect,
+  inject,
+  signal
+} from '@angular/core';
+import {
+  Router,
+  NavigationStart,
+  NavigationEnd,
+  NavigationCancel,
+  NavigationError,
+  RouterLink,
+  RouterLinkActive
+} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
-import {
-  RouterLink,
-  RouterLinkActive,
-  Router,
-  NavigationStart,
-  NavigationEnd,
-  NavigationCancel,
-  NavigationError
-} from '@angular/router';
-import { filter } from 'rxjs/operators';
+
 import { CartService } from '../../features/cart/cart.service';
-import { Basket } from '../../shared/models/basket';
 import { AccountService } from '../../core/services/account.service';
+import { Basket } from '../../shared/models/basket';
 import { User } from '../../core/models/user';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-header',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatIconModule,
@@ -31,57 +38,54 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatButtonModule,
     MatProgressBarModule,
     MatMenuModule,
-    RouterLinkActive,
-    RouterLink
+    RouterLink,
+    RouterLinkActive
   ],
   templateUrl: './header.html',
   styleUrls: ['./header.scss']
 })
 export class Header {
-  itemCount = 0;
-  isLoading = false;
-  currentUser: User | null = null;
-
   private cartService = inject(CartService);
   private accountService = inject(AccountService);
-  private cdRef = inject(ChangeDetectorRef);
-  public router = inject(Router); // 👈 needs to be public for template binding
+  public router = inject(Router);
+public currentUrl = this.router.url;
+
+  // 🔄 Reactive state using signals
+  itemCount = signal(0);
+  isLoading = signal(false);
+  currentUser = signal<User | null>(null);
 
   constructor() {
-    this.cartService.basket$
-      .pipe(takeUntilDestroyed())
-      .subscribe((basket: Basket | null) => {
-        this.itemCount = basket?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
-        this.cdRef.detectChanges();
+    // ✅ Automatically update item count from basket
+    effect(() => {
+      this.cartService.basket$.subscribe((basket: Basket | null) => {
+        const count = basket?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
+        this.itemCount.set(count);
       });
+    });
 
-    this.accountService.currentUser$
-      .pipe(takeUntilDestroyed())
-      .subscribe(user => {
-        this.currentUser = user;
-        this.cdRef.detectChanges();
+    // ✅ Automatically update user state
+    effect(() => {
+      this.accountService.currentUser$.subscribe(user => {
+        this.currentUser.set(user);
       });
+    });
 
-    this.router.events
-      .pipe(
-        takeUntilDestroyed(),
-        filter(event =>
-          event instanceof NavigationStart ||
-          event instanceof NavigationEnd ||
-          event instanceof NavigationCancel ||
-          event instanceof NavigationError
-        )
-      )
-      .subscribe(event => {
-        this.isLoading = event instanceof NavigationStart;
-        this.cdRef.detectChanges();
-      });
+    // ✅ Update loading state on route events
+    this.router.events.subscribe(event => {
+      const isStart = event instanceof NavigationStart;
+      const isEnd =
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError;
+
+      if (isStart) this.isLoading.set(true);
+      else if (isEnd) this.isLoading.set(false);
+    });
   }
 
   logout() {
     this.accountService.logout();
-    this.currentUser = null;
     this.router.navigateByUrl('/');
-    this.cdRef.detectChanges();
   }
 }
