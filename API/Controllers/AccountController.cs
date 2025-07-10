@@ -36,7 +36,8 @@ namespace API.Controllers
             {
                 DisplayName = dto.DisplayName,
                 Email = email,
-                UserName = email
+                UserName = email,
+                AvatarUrl = dto.AvatarUrl
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -49,7 +50,8 @@ namespace API.Controllers
                 DisplayName = user.DisplayName,
                 Email = user.Email!,
                 Token = await _tokenService.CreateToken(user),
-                Roles = new List<string> { "Member" }
+                Roles = new List<string> { "Member" },
+                AvatarUrl = user.AvatarUrl
             };
         }
 
@@ -70,7 +72,8 @@ namespace API.Controllers
                 DisplayName = user.DisplayName,
                 Email = user.Email!,
                 Token = await _tokenService.CreateToken(user),
-                Roles = roles.ToList()
+                Roles = roles.ToList(),
+                AvatarUrl = user.AvatarUrl
             };
         }
     }
