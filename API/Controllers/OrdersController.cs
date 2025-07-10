@@ -3,10 +3,12 @@ using API.DTOs;
 using AutoMapper;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class OrdersController : ControllerBase
@@ -23,8 +25,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<OrderToReturnDto>> CreateOrder([FromBody] OrderDto orderDto)
         {
-            if (string.IsNullOrWhiteSpace(orderDto.Email))
-                return BadRequest("Email is required.");
+            var email = User?.Identity?.Name;
+            if (email == null) return Unauthorized("User email not found in token");
 
             if (string.IsNullOrWhiteSpace(orderDto.BasketId))
                 return BadRequest("Basket ID is required.");
@@ -32,11 +34,10 @@ namespace API.Controllers
             if (orderDto.ShippingAddress == null)
                 return BadRequest("Shipping address is required.");
 
-            // 🔁 Map AddressDto to Address (domain)
             var shippingAddress = _mapper.Map<Address>(orderDto.ShippingAddress);
 
             var order = await _orderService.CreateOrderAsync(
-                orderDto.Email,
+                email,
                 orderDto.DeliveryMethodId,
                 orderDto.BasketId,
                 shippingAddress
@@ -50,10 +51,10 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<OrderToReturnDto>>> GetOrdersForUser([FromQuery] string email)
+        public async Task<ActionResult<IReadOnlyList<OrderToReturnDto>>> GetOrdersForUser()
         {
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest("Email is required.");
+            var email = User?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(email)) return Unauthorized("Email not found in token");
 
             var orders = await _orderService.GetOrdersForUserAsync(email);
             var result = _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders);

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Order } from '../models/order';
-import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
+import { OrderDto } from '../models/orderDto'; // ✅ Import OrderDto
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private baseUrl = `${environment.apiUrl}/orders`;
+  private baseUrl = 'https://localhost:5051/api/orders';
 
   constructor(private http: HttpClient) {}
 
@@ -14,8 +14,8 @@ export class OrderService {
     return this.http.get<Order[]>(this.baseUrl);
   }
 
-  placeOrder(orderDto: any): Observable<any> {
-  return this.http.post(this.baseUrl, orderDto);
-}
+ placeOrder(order: OrderDto): Observable<Order> {
+   return this.http.post<Order>(this.baseUrl, order); // ✅ CORRECT
 
-  }
+}
+}

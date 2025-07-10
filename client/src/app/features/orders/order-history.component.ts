@@ -21,7 +21,7 @@ export class OrderHistoryComponent {
   constructor() {
     this.orderService.getOrdersForUser().subscribe({
       next: (orders) => this.orders.set(orders),
-      error: () => this.error.set('Failed to load orders')
+      error: () => this.error.set('❌ Failed to load orders')
     });
   }
 }
