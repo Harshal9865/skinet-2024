@@ -13,6 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()) // ✅ Enables Angular DI-based interceptors
+    provideHttpClient(withInterceptorsFromDi()) // ✅ Automatically picks up DI-based interceptors
   ]
 };

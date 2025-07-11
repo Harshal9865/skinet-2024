@@ -6,7 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { OrderService } from '../../core/services/order.services';
+
+import { CheckoutService } from '../../core/services/checkout.service'; // ✅ Correct service
 import { AccountService } from '../../core/services/account.service';
 
 @Component({
@@ -30,7 +31,7 @@ export class CheckoutComponent {
   constructor(
     private fb: FormBuilder,
     private snack: MatSnackBar,
-    private orderService: OrderService,
+    private checkoutService: CheckoutService, // ✅ Fixed injection
     private accountService: AccountService,
     private router: Router
   ) {
@@ -53,9 +54,10 @@ export class CheckoutComponent {
     const address = this.checkoutForm.value;
     const basketId = localStorage.getItem('basket_id');
     const deliveryMethodId = 1;
-    const email = this.accountService.currentUserValue?.email;
+    const email = this.accountService.getCurrentUserValue()?.email;
 
     if (!basketId || !email) {
+      console.warn('Missing basketId or user not logged in');
       this.snack.open('Please login and add items to cart.', 'Close', { duration: 3000 });
       return;
     }
@@ -67,7 +69,7 @@ export class CheckoutComponent {
       shippingAddress: address
     };
 
-    this.orderService.placeOrder(order).subscribe({
+    this.checkoutService.createOrder(order).subscribe({
       next: () => {
         this.snack.open('Order placed successfully!', 'Close', { duration: 3000 });
         localStorage.removeItem('basket_id');

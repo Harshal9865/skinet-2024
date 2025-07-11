@@ -9,72 +9,51 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
-  private readonly storageKeyToken = 'token';
-  private readonly storageKeyUser = 'user';
-
   private currentUserSource = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSource.asObservable();
+  baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {
-    this.loadUserFromStorage();
-  }
-
-  get currentUserValue(): User | null {
-    return this.currentUserSource.value;
-  }
-
-  // Load user from localStorage on app start
-  private loadUserFromStorage(): void {
-    const token = localStorage.getItem(this.storageKeyToken);
-    const userJson = localStorage.getItem(this.storageKeyUser);
-
-    if (token && userJson) {
-      try {
-        const user = JSON.parse(userJson) as User;
-        this.currentUserSource.next(user);
-      } catch {
-        this.logout(); // Clear corrupted data
-      }
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.currentUserSource.next(JSON.parse(user));
     }
   }
 
-  // Log in and store user
-  login(dto: Login) {
-    return this.http.post<User>(`${environment.apiUrl}/account/login`, dto).pipe(
+  login(values: Login) {
+    return this.http.post<User>(this.baseUrl + 'account/login', values).pipe(
       map(user => {
-        this.storeUser(user);
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSource.next(user);
+        }
         return user;
       })
     );
   }
 
-  // Register and store user
-  register(dto: Register) {
-    return this.http.post<User>(`${environment.apiUrl}/account/register`, dto).pipe(
+  register(values: Register) {
+    return this.http.post<User>(this.baseUrl + 'account/register', values).pipe(
       map(user => {
-        this.storeUser(user);
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSource.next(user);
+        }
         return user;
       })
     );
   }
 
-  // Logout and clear storage
-  logout(): void {
-    localStorage.removeItem(this.storageKeyToken);
-    localStorage.removeItem(this.storageKeyUser);
+  logout() {
+    localStorage.removeItem('user');
     this.currentUserSource.next(null);
   }
 
-  // Check if user has admin role
+  getCurrentUserValue(): User | null {
+    return this.currentUserSource.value;
+  }
   get isAdmin(): boolean {
-    const user = this.currentUserValue;
-    return user?.roles?.includes('Admin') ?? false;
-  }
+  return this.currentUserSource.value?.roles?.includes('Admin') ?? false;
+}
 
-  // Save token + user to localStorage
-  private storeUser(user: User): void {
-    localStorage.setItem(this.storageKeyToken, user.token);
-    localStorage.setItem(this.storageKeyUser, JSON.stringify(user));
-    this.currentUserSource.next(user);
-  }
 }

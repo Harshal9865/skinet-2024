@@ -5,6 +5,7 @@ using Core.Entities.OrderAggregate;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using API.Extensions; // ✅ Add this
 
 namespace API.Controllers
 {
@@ -25,7 +26,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<OrderToReturnDto>> CreateOrder([FromBody] OrderDto orderDto)
         {
-            var email = User?.Identity?.Name;
+            var email = User.RetrieveEmailFromPrincipal(); 
             if (email == null) return Unauthorized("User email not found in token");
 
             if (string.IsNullOrWhiteSpace(orderDto.BasketId))

@@ -1,13 +1,14 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { OrderService } from '../../core/services/order.services';
 import { Order } from '../../core/models/order';
 
 @Component({
   selector: 'app-order-history',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule, MatCardModule, MatProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './order-history.component.html',
   styleUrls: ['./order-history.component.scss']
@@ -17,11 +18,18 @@ export class OrderHistoryComponent {
 
   orders = signal<Order[]>([]);
   error = signal<string | null>(null);
+  loading = signal(true); // ✅ loading state
 
   constructor() {
     this.orderService.getOrdersForUser().subscribe({
-      next: (orders) => this.orders.set(orders),
-      error: () => this.error.set('❌ Failed to load orders')
+      next: (orders) => {
+        this.orders.set(orders);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('❌ Failed to load orders');
+        this.loading.set(false);
+      }
     });
   }
 }
