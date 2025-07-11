@@ -6,6 +6,7 @@ import { User } from '../models/user';
 import { Login } from '../models/login';
 import { Register } from '../models/register';
 import { environment } from '../../../environments/environment';
+import { Address } from '../models/address';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -48,6 +49,27 @@ export class AccountService {
     localStorage.removeItem('user');
     this.currentUserSource.next(null);
   }
+getCurrentUserFromApi() {
+  return this.http.get<User>(this.baseUrl + 'account/current-user').pipe(
+    map(user => {
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+        this.currentUserSource.next(user);
+      }
+      return user;
+    })
+  );
+}
+updateAddress(address: Address) {
+  return this.http.put<User>(this.baseUrl + 'account/address', address).pipe(
+    map((user) => {
+      localStorage.setItem('user', JSON.stringify(user));
+      this.currentUserSource.next(user);
+      return user;
+    })
+  );
+}
+
 
   getCurrentUserValue(): User | null {
     return this.currentUserSource.value;

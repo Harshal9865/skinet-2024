@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-import { CheckoutService } from '../../core/services/checkout.service'; // ✅ Correct service
+import { CheckoutService } from '../../core/services/checkout.service';
 import { AccountService } from '../../core/services/account.service';
 
 @Component({
@@ -25,13 +25,13 @@ import { AccountService } from '../../core/services/account.service';
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss']
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnInit {
   checkoutForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private snack: MatSnackBar,
-    private checkoutService: CheckoutService, // ✅ Fixed injection
+    private checkoutService: CheckoutService,
     private accountService: AccountService,
     private router: Router
   ) {
@@ -42,6 +42,25 @@ export class CheckoutComponent {
       city: ['', Validators.required],
       state: ['', Validators.required],
       zipCode: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    const address = this.accountService.getCurrentUserValue()?.address;
+
+    if (!address?.street) {
+      this.snack.open('Please complete your profile before checkout.', 'Close', { duration: 3000 });
+      this.router.navigate(['/profile/edit']);
+      return;
+    }
+
+    this.checkoutForm.patchValue({
+      firstName: address.firstName || '',
+      lastName: address.lastName || '',
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode
     });
   }
 
@@ -71,13 +90,13 @@ export class CheckoutComponent {
 
     this.checkoutService.createOrder(order).subscribe({
       next: () => {
-        this.snack.open('Order placed successfully!', 'Close', { duration: 3000 });
+        this.snack.open('✅ Order placed successfully!', 'Close', { duration: 3000 });
         localStorage.removeItem('basket_id');
         this.router.navigate(['/orders']);
       },
       error: (err) => {
         console.error(err);
-        this.snack.open('Order failed. Please try again.', 'Close', { duration: 3000 });
+        this.snack.open('❌ Order failed. Please try again.', 'Close', { duration: 3000 });
       }
     });
   }
