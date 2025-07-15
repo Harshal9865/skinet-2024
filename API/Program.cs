@@ -19,16 +19,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
         policy.AllowAnyHeader()
               .AllowAnyMethod()
+              .AllowCredentials() // ✅ add this
               .WithOrigins("http://localhost:4200", "https://localhost:4200");
     });
 });
+
 
 // Store database
 builder.Services.AddDbContext<StoreContext>(options =>
@@ -151,7 +152,6 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors("CorsPolicy");
-
 app.UseAuthentication();
 app.UseAuthorization();
 

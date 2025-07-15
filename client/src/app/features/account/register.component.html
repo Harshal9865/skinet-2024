@@ -1,9 +1,9 @@
-<!-- src/app/features/account/register.component.html -->
+<!-- src/app/features/account/register/register.component.html -->
 <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
   <div class="w-full max-w-md p-6 bg-white rounded shadow">
     <h2 class="text-2xl font-semibold mb-5 text-center">Create Account</h2>
 
-    <form [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
       <mat-form-field appearance="outline" class="w-full mb-4">
         <mat-label>Display Name</mat-label>
         <input matInput formControlName="displayName" placeholder="Your full name" />

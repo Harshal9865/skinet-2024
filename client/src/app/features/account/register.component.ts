@@ -34,19 +34,19 @@ export class RegisterComponent {
   private snackbar = inject(MatSnackBar);
   private location = inject(Location);
 
-  form: FormGroup = this.fb.group({
+  registerForm: FormGroup = this.fb.group({
     displayName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       return;
     }
 
-    this.accountService.register(this.form.value).subscribe({
+    this.accountService.register(this.registerForm.value).subscribe({
       next: () => {
         this.snackbar.open('Registered successfully!', 'Close', { duration: 2500 });
 

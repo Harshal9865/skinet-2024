@@ -7,6 +7,6 @@ bootstrapApplication(App, {
   ...appConfig,
   providers: [
     ...appConfig.providers,
-    provideZonelessChangeDetection() // ✅ Enables Angular without zone.js
+    provideZonelessChangeDetection()
   ]
 });
