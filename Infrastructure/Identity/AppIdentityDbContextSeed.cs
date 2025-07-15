@@ -19,7 +19,16 @@ namespace Infrastructure.Identity
                 {
                     DisplayName = "Harsh",
                     Email = "harsh@example.com",
-                    UserName = "harsh@example.com"
+                    UserName = "harsh@example.com",
+                    Address = new UserAddress
+                    {
+                        FirstName = "Harsh",
+                        LastName = "Sharma",
+                        Street = "123 Street",
+                        City = "Mumbai",
+                        State = "MH",
+                        Zipcode = "400001"
+                    }
                 };
 
                 await userManager.CreateAsync(user, "Pa$$w0rd");
@@ -29,7 +38,16 @@ namespace Infrastructure.Identity
                 {
                     DisplayName = "Admin",
                     Email = "admin@example.com",
-                    UserName = "admin@example.com"
+                    UserName = "admin@example.com",
+                    Address = new UserAddress
+                    {
+                        FirstName = "Admin",
+                        LastName = "User",
+                        Street = "Admin Lane",
+                        City = "Delhi",
+                        State = "DL",
+                        Zipcode = "110001"
+                    }
                 };
 
                 await userManager.CreateAsync(admin, "Pa$$w0rd");

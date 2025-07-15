@@ -3,17 +3,13 @@ using Core.Entities.Identity;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Identity;
-using API.Services;
+using Infrastructure.Services;
+using API.Extensions;
+using API.RequestHelpers;
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
-using System.Text;
-using Infrastructure.Services;
-using API.RequestHelpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,18 +42,8 @@ builder.Services.AddDbContext<AppIdentityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
 
-// Repositories & UoW
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IOrderService, OrderService>(); // ✅ Removed duplicate
-
-// Services
-builder.Services.AddScoped<ITokenService, TokenService>();
-
-// AutoMapper
-builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+// JWT Auth via extension method
+builder.Services.AddIdentityServices(builder.Configuration);
 
 // Identity Core
 builder.Services.AddIdentityCore<AppUser>(opt =>
@@ -68,35 +54,23 @@ builder.Services.AddIdentityCore<AppUser>(opt =>
 .AddEntityFrameworkStores<AppIdentityDbContext>()
 .AddSignInManager<SignInManager<AppUser>>();
 
-// JWT Authentication
-var tokenKey = builder.Configuration["Token:Key"] 
-    ?? throw new ArgumentNullException("Token:Key is missing in configuration.");
-var issuer = builder.Configuration["Token:Issuer"] 
-    ?? throw new ArgumentNullException("Token:Issuer is missing in configuration.");
-var audience = builder.Configuration["Token:Audience"] 
-    ?? throw new ArgumentNullException("Token:Audience is missing in configuration.");
+// Repositories & UoW
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
-            ValidIssuer = issuer,
-            ValidAudience = audience,
-            ValidateIssuer = true,
-            ValidateAudience = true
-        };
-    });
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
-// Swagger + JWT Auth
+// Swagger + JWT Support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Skinet API", Version = "v1" });
 
-    // Enable JWT in Swagger UI
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
         Scheme = "bearer",
@@ -107,7 +81,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Enter 'Bearer {your token}' below.",
         Reference = new OpenApiReference
         {
-            Id = JwtBearerDefaults.AuthenticationScheme,
+            Id = "Bearer",
             Type = ReferenceType.SecurityScheme
         }
     };
@@ -132,10 +106,8 @@ var app = builder.Build();
 // Configure Middleware Pipeline
 // ----------------------------
 
-// Global exception handler
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Swagger (Development only)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -145,11 +117,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// DB migration and seeding
+// Migrate and seed
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
     try
     {
         var storeContext = services.GetRequiredService<StoreContext>();
@@ -169,20 +140,19 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Standard middleware
 app.UseHttpsRedirection();
 
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
-        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=604800"); // 7 days
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=604800");
     }
 });
 
 app.UseCors("CorsPolicy");
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

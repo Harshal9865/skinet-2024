@@ -38,7 +38,7 @@ export class Shop {
       params = params.set('search', shopParams.search.trim());
     }
 
-    return this.http.get<Pagination<Product>>(`${this.baseUrl}/products`, { params }).pipe(
+    return this.http.get<Pagination<Product>>(`${this.baseUrl}products`, { params }).pipe(
       catchError(error => {
         console.error('Error fetching products:', error);
         throw error;
@@ -51,7 +51,7 @@ export class Shop {
       return of(this.productCache.get(id)!);
     }
 
-    return this.http.get<Product>(`${this.baseUrl}/products/${id}`).pipe(
+    return this.http.get<Product>(`${this.baseUrl}products/${id}`).pipe(
       tap(product => this.productCache.set(id, product)),
       catchError(error => {
         console.error(`Error fetching product with id ${id}:`, error);
@@ -61,7 +61,7 @@ export class Shop {
   }
 
  getBrands(): Observable<string[]> {
-  return this.http.get<string[]>(`${this.baseUrl}/products/brands`).pipe(
+  return this.http.get<string[]>(`${this.baseUrl}products/brands`).pipe(
     catchError(err => {
       console.error('Error fetching brands', err);
       return of([]);
@@ -70,7 +70,7 @@ export class Shop {
 }
 
 getTypes(): Observable<string[]> {
-  return this.http.get<string[]>(`${this.baseUrl}/products/types`).pipe(
+  return this.http.get<string[]>(`${this.baseUrl}products/types`).pipe(
     catchError(err => {
       console.error('Error fetching types', err);
       return of([]);

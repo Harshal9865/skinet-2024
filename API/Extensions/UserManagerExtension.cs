@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using Core.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace API.Extensions
 {

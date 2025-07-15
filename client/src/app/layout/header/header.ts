@@ -1,7 +1,6 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  computed,
   effect,
   inject,
   signal
@@ -48,15 +47,15 @@ export class Header {
   private cartService = inject(CartService);
   private accountService = inject(AccountService);
   public router = inject(Router);
-public currentUrl = this.router.url;
 
-  // 🔄 Reactive state using signals
+  // 🔄 Reactive signals
   itemCount = signal(0);
   isLoading = signal(false);
   currentUser = signal<User | null>(null);
+  currentUrl = signal<string>(this.router.url); // ✅ signal that updates on nav
 
   constructor() {
-    // ✅ Automatically update item count from basket
+    // ✅ Basket item count updater
     effect(() => {
       this.cartService.basket$.subscribe((basket: Basket | null) => {
         const count = basket?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
@@ -64,23 +63,25 @@ public currentUrl = this.router.url;
       });
     });
 
-    // ✅ Automatically update user state
+    // ✅ User state updater
     effect(() => {
       this.accountService.currentUser$.subscribe(user => {
         this.currentUser.set(user);
       });
     });
 
-    // ✅ Update loading state on route events
+    // ✅ Handle route loading & update currentUrl on navigation
     this.router.events.subscribe(event => {
-      const isStart = event instanceof NavigationStart;
-      const isEnd =
+      if (event instanceof NavigationStart) {
+        this.isLoading.set(true);
+      } else if (
         event instanceof NavigationEnd ||
         event instanceof NavigationCancel ||
-        event instanceof NavigationError;
-
-      if (isStart) this.isLoading.set(true);
-      else if (isEnd) this.isLoading.set(false);
+        event instanceof NavigationError
+      ) {
+        this.isLoading.set(false);
+        this.currentUrl.set(this.router.url); // ✅ update current url on end
+      }
     });
   }
 

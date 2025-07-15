@@ -1,7 +1,10 @@
-using Core.Entities.OrderAggregate;
+using Core.Entities.Identity;
 
-public class UserUpdateDto
+namespace API.DTOs
 {
-    public required string DisplayName { get; set; }
-    public required Address Address { get; set; }
+    public class UserUpdateDto
+    {
+        public string DisplayName { get; set; } = string.Empty;
+        public UserAddress Address { get; set; } = new UserAddress();
+    }
 }

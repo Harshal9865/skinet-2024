@@ -7,6 +7,9 @@ using API.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using AutoMapper;
+using API.Extensions;
+using UserAddress = Core.Entities.Identity.UserAddress;
+using API.Dtos;
 
 namespace API.Controllers
 {
@@ -32,26 +35,35 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
+public async Task<ActionResult<UserDto>> Register(RegisterDto dto)
+{
+    var email = dto.Email.ToLower();
+    if (await _userManager.Users.AnyAsync(x => x.Email == email))
+        return BadRequest(new { errors = new { Email = new[] { "Email already taken" } } });
+
+    var user = new AppUser
+    {
+        DisplayName = dto.DisplayName,
+        Email = email,
+        UserName = email,
+        AvatarUrl = dto.AvatarUrl
+    };
+
+    var result = await _userManager.CreateAsync(user, dto.Password);
+    if (!result.Succeeded)
+    {
+        return BadRequest(new
         {
-            var email = dto.Email?.ToLower() ?? throw new ArgumentNullException(nameof(dto.Email));
-            if (await _userManager.Users.AnyAsync(x => x.Email == email))
-                return BadRequest("Email already taken");
+            errors = result.Errors
+                .GroupBy(e => e.Code)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray())
+        });
+    }
 
-            var user = new AppUser
-            {
-                DisplayName = dto.DisplayName,
-                Email = email,
-                UserName = email,
-                AvatarUrl = dto.AvatarUrl
-            };
+    await _userManager.AddToRoleAsync(user, "Member");
+    return await CreateUserDto(user);
+}
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded) return BadRequest(result.Errors);
-
-            await _userManager.AddToRoleAsync(user, "Member");
-            return await CreateUserDto(user);
-        }
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto dto)
@@ -108,7 +120,7 @@ namespace API.Controllers
             var user = await _userManager.FindByEmailFromClaimsPrincipal(User);
             if (user == null) return Unauthorized();
 
-            user.Address = _mapper.Map<AddressDto, Address>(addressDto);
+            user.Address = _mapper.Map<AddressDto, UserAddress>(addressDto);
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded) return BadRequest("Failed to update user address");
@@ -120,7 +132,6 @@ namespace API.Controllers
             return await CreateUserDto(updatedUser!);
         }
 
-        // ✅ Helper method to construct UserDto response
         private async Task<UserDto> CreateUserDto(AppUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);

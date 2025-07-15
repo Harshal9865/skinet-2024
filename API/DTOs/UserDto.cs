@@ -1,12 +1,15 @@
-using Core.Entities.OrderAggregate;
+using Core.Entities.Identity;
 
-public class UserDto
+namespace API.DTOs
 {
-    public string DisplayName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Token { get; set; } = string.Empty;
-    public List<string> Roles { get; set; } = new();
-    public string AvatarUrl { get; set; } = string.Empty;
+    public class UserDto
+    {
+        public string DisplayName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+        public List<string> Roles { get; set; } = new();
+        public string AvatarUrl { get; set; } = string.Empty;
 
-    public Address? Address { get; set; }  
+        public UserAddress? Address { get; set; }
+    }
 }

@@ -1,4 +1,3 @@
-using Core.Entities.OrderAggregate;
 using Microsoft.AspNetCore.Identity;
 
 namespace Core.Entities.Identity
@@ -8,6 +7,6 @@ namespace Core.Entities.Identity
         public string DisplayName { get; set; } = string.Empty;
         public string AvatarUrl { get; set; } = string.Empty;
 
-        public Address Address { get; set; } = new Address();
+        public UserAddress Address { get; set; } = new UserAddress();
     }
 }

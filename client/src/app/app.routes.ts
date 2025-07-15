@@ -10,7 +10,7 @@ import { ProfileComponent } from './features/profile/profile.component';
 import { CheckoutComponent } from './features/checkout/checkout.component';
 import { AuthGuard } from './core/services/guards/auth.guard';
 import { AdminGuard } from './core/services/guards/admin.guard';
-import { OrderHistoryComponent } from './features/orders/order-history.component'; // ✅ Add this
+import { OrderHistoryComponent } from './features/orders/order-history.component';
 import { ProfileEditComponent } from './features/profile/profile-edit.component';
 
 export const routes: Routes = [
@@ -21,9 +21,9 @@ export const routes: Routes = [
   { path: 'contact', component: ContactComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'profile/edit', component: ProfileEditComponent, canActivate: [AuthGuard] },
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'orders', component: OrderHistoryComponent, canActivate: [AuthGuard] },
 
   {

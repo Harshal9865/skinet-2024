@@ -17,14 +17,25 @@ export class AccountService {
   constructor(private http: HttpClient) {
     const user = localStorage.getItem('user');
     if (user) {
-      this.currentUserSource.next(JSON.parse(user));
+      try {
+        const parsedUser: User = JSON.parse(user);
+        if (parsedUser && parsedUser.token) {
+          this.currentUserSource.next(parsedUser);
+        }
+      } catch (e) {
+        localStorage.removeItem('user');
+      }
     }
   }
 
+  private formatUrl(endpoint: string): string {
+    return `${this.baseUrl}${endpoint}`.replace(/([^:]\/)\/+/g, '$1');
+  }
+
   login(values: Login) {
-    return this.http.post<User>(this.baseUrl + 'account/login', values).pipe(
+    return this.http.post<User>(this.formatUrl('account/login'), values).pipe(
       map(user => {
-        if (user) {
+        if (user && user.token) {
           localStorage.setItem('user', JSON.stringify(user));
           this.currentUserSource.next(user);
         }
@@ -34,9 +45,9 @@ export class AccountService {
   }
 
   register(values: Register) {
-    return this.http.post<User>(this.baseUrl + 'account/register', values).pipe(
+    return this.http.post<User>(this.formatUrl('account/register'), values).pipe(
       map(user => {
-        if (user) {
+        if (user && user.token) {
           localStorage.setItem('user', JSON.stringify(user));
           this.currentUserSource.next(user);
         }
@@ -49,33 +60,36 @@ export class AccountService {
     localStorage.removeItem('user');
     this.currentUserSource.next(null);
   }
-getCurrentUserFromApi() {
-  return this.http.get<User>(this.baseUrl + 'account/current-user').pipe(
-    map(user => {
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUserSource.next(user);
-      }
-      return user;
-    })
-  );
-}
-updateAddress(address: Address) {
-  return this.http.put<User>(this.baseUrl + 'account/address', address).pipe(
-    map((user) => {
-      localStorage.setItem('user', JSON.stringify(user));
-      this.currentUserSource.next(user);
-      return user;
-    })
-  );
-}
 
+  getCurrentUserFromApi() {
+    return this.http.get<User>(this.formatUrl('account/current-user')).pipe(
+      map(user => {
+        if (user && user.token) {
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSource.next(user);
+        }
+        return user;
+      })
+    );
+  }
+
+  updateAddress(address: Address) {
+    return this.http.put<User>(this.formatUrl('account/address'), address).pipe(
+      map(user => {
+        if (user && user.token) {
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUserSource.next(user);
+        }
+        return user;
+      })
+    );
+  }
 
   getCurrentUserValue(): User | null {
     return this.currentUserSource.value;
   }
-  get isAdmin(): boolean {
-  return this.currentUserSource.value?.roles?.includes('Admin') ?? false;
-}
 
+  get isAdmin(): boolean {
+    return this.currentUserSource.value?.roles?.includes('Admin') ?? false;
+  }
 }

@@ -43,16 +43,26 @@ export class CheckoutComponent implements OnInit {
       state: ['', Validators.required],
       zipCode: ['', Validators.required]
     });
+
+    console.log('✅ CheckoutComponent constructor executed');
   }
 
   ngOnInit(): void {
-    const address = this.accountService.getCurrentUserValue()?.address;
+    console.log('✅ ngOnInit started');
+
+    const user = this.accountService.getCurrentUserValue();
+    console.log('👤 Current user from accountService:', user);
+
+    const address = user?.address;
 
     if (!address?.street) {
+      console.warn('⚠️ No valid address found. Redirecting to profile edit.');
       this.snack.open('Please complete your profile before checkout.', 'Close', { duration: 3000 });
       this.router.navigate(['/profile/edit']);
       return;
     }
+
+    console.log('✅ Address found:', address);
 
     this.checkoutForm.patchValue({
       firstName: address.firstName || '',
@@ -62,21 +72,31 @@ export class CheckoutComponent implements OnInit {
       state: address.state,
       zipCode: address.zipCode
     });
+
+    console.log('✅ Checkout form patched with address');
   }
 
   submit(): void {
+    console.log('🚀 submit() triggered');
+
     if (this.checkoutForm.invalid) {
+      console.warn('⚠️ Form is invalid. Marking all as touched.');
       this.checkoutForm.markAllAsTouched();
       return;
     }
 
     const address = this.checkoutForm.value;
+    console.log('📦 Address form value:', address);
+
     const basketId = localStorage.getItem('basket_id');
-    const deliveryMethodId = 1;
     const email = this.accountService.getCurrentUserValue()?.email;
+    const deliveryMethodId = 1;
+
+    console.log('🧺 basketId:', basketId);
+    console.log('📧 email:', email);
 
     if (!basketId || !email) {
-      console.warn('Missing basketId or user not logged in');
+      console.error('❌ Missing basketId or user email. Cannot proceed.');
       this.snack.open('Please login and add items to cart.', 'Close', { duration: 3000 });
       return;
     }
@@ -88,14 +108,17 @@ export class CheckoutComponent implements OnInit {
       shippingAddress: address
     };
 
+    console.log('📤 Sending order payload:', order);
+
     this.checkoutService.createOrder(order).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('✅ Order placed successfully:', res);
         this.snack.open('✅ Order placed successfully!', 'Close', { duration: 3000 });
         localStorage.removeItem('basket_id');
         this.router.navigate(['/orders']);
       },
       error: (err) => {
-        console.error(err);
+        console.error('❌ Order failed:', err);
         this.snack.open('❌ Order failed. Please try again.', 'Close', { duration: 3000 });
       }
     });

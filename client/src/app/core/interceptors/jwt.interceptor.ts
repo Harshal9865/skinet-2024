@@ -1,32 +1,22 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent
-} from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AccountService } from '../services/account.service';
-import { take, switchMap } from 'rxjs/operators';
+import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
-@Injectable({ providedIn: 'root' }) // ✅ This is required for DI
-export class JwtInterceptor implements HttpInterceptor {
-  constructor(private accountService: AccountService) {}
+// ✅ Functional interceptor compatible with Angular zoneless + Vite
+export const JwtInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> => {
+  const userJson = localStorage.getItem('user');
+  const user = userJson ? JSON.parse(userJson) : null;
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return this.accountService.currentUser$.pipe(
-      take(1),
-      switchMap(user => {
-        if (user?.token) {
-          const cloned = req.clone({
-            setHeaders: {
-              Authorization: `Bearer ${user.token}`
-            }
-          });
-          return next.handle(cloned);
-        }
-        return next.handle(req);
-      })
-    );
+  if (user?.token) {
+    console.log('✅ Attaching token from JwtInterceptor:', user.token);
+    const cloned = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${user.token}`
+      }
+    });
+    return next(cloned);
   }
-}
+
+  console.warn('⚠️ JwtInterceptor: No token found in localStorage');
+  return next(req);
+};
