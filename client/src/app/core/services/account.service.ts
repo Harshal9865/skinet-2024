@@ -56,11 +56,6 @@ export class AccountService {
     );
   }
 
-  logout() {
-    localStorage.removeItem('user');
-    this.currentUserSource.next(null);
-  }
-
   getCurrentUserFromApi() {
     return this.http.get<User>(this.formatUrl('account/current-user')).pipe(
       map(user => {
@@ -83,6 +78,13 @@ export class AccountService {
         return user;
       })
     );
+  }
+
+  logout(): void {
+    localStorage.removeItem('user');
+    localStorage.removeItem('basket_id');         // ✅ Clear user's basket on logout
+    localStorage.removeItem('shipping_address');  // ✅ Clear user's shipping address
+    this.currentUserSource.next(null);
   }
 
   getCurrentUserValue(): User | null {

@@ -90,10 +90,6 @@ export class CheckoutComponent implements OnInit {
 
     const basketId = localStorage.getItem('basket_id');
     const email = this.accountService.getCurrentUserValue()?.email;
-    const deliveryMethodId = 1;
-
-    console.log('🧺 basketId:', basketId);
-    console.log('📧 email:', email);
 
     if (!basketId || !email) {
       console.error('❌ Missing basketId or user email. Cannot proceed.');
@@ -101,27 +97,10 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    // ✅ CORRECT camelCase keys for backend API
-    const order = {
-      email,
-      basketId,
-      deliveryMethodId,
-      shippingAddress: address
-    };
+    // ✅ Store address for use in payment page
+    localStorage.setItem('shipping_address', JSON.stringify(address));
 
-    console.log('📤 Sending order payload:', order);
-
-    this.checkoutService.createOrder(order).subscribe({
-      next: (res) => {
-        console.log('✅ Order placed successfully:', res);
-        this.snack.open('✅ Order placed successfully!', 'Close', { duration: 3000 });
-        localStorage.removeItem('basket_id');
-        this.router.navigate(['/orders']);
-      },
-      error: (err) => {
-        console.error('❌ Order failed:', err);
-        this.snack.open('❌ Order failed. Please try again.', 'Close', { duration: 3000 });
-      }
-    });
+    // ✅ Redirect to payment page
+    this.router.navigate(['/payment']);
   }
 }

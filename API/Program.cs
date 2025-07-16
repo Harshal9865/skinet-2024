@@ -54,7 +54,7 @@ builder.Services.AddIdentityCore<AppUser>(opt =>
 .AddEntityFrameworkStores<AppIdentityDbContext>()
 .AddSignInManager<SignInManager<AppUser>>();
 
-// Redis - Use configuration value from appsettings.json
+// Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
 {
     var config = builder.Configuration.GetSection("Redis")["ConnectionString"] ?? "localhost:6379";
@@ -132,6 +132,7 @@ using (var scope = app.Services.CreateScope())
     {
         var storeContext = services.GetRequiredService<StoreContext>();
         await storeContext.Database.MigrateAsync();
+        await StoreContextSeed.SeedAsync(storeContext); // ✅ Seed Products & DeliveryMethods
 
         var identityContext = services.GetRequiredService<AppIdentityDbContext>();
         await identityContext.Database.MigrateAsync();

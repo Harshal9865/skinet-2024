@@ -34,7 +34,12 @@
 
       <div class="order-items">
         <div *ngFor="let item of order.orderItems" class="order-item">
-          <img [src]="item.pictureUrl" [alt]="item.productName" class="product-img" />
+          <img
+            [src]="item.pictureUrl"
+            [alt]="item.productName"
+            class="product-img"
+            onerror="this.src='assets/images/placeholder.png'"
+          />
           <div class="product-info">
             <p class="product-name">{{ item.productName }}</p>
             <p class="product-qty">Qty: {{ item.quantity }}</p>

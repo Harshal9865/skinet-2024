@@ -5,6 +5,7 @@ import { Observable, throwError } from 'rxjs';
 import { Order } from '../models/order';
 import { ShippingService } from './shipping.service';
 import { AccountService } from './account.service';
+import { IDeliveryMethod } from '../models/delivery-method';
 
 @Injectable({ providedIn: 'root' })
 export class CheckoutService {
@@ -20,14 +21,14 @@ export class CheckoutService {
     return this.http.post<Order>(this.baseUrl + 'orders', order);
   }
 
-  /**
-   * Used by payment page to place order using saved address
-   */
-  createOrderFromSavedShipping(): Observable<Order> {
+  getDeliveryMethods(): Observable<IDeliveryMethod[]> {
+    return this.http.get<IDeliveryMethod[]>(this.baseUrl + 'deliverymethods');
+  }
+
+  createOrderFromSavedShipping(deliveryMethodId = 1): Observable<Order> {
     const address = this.shippingService.get();
     const basketId = localStorage.getItem('basket_id');
     const email = this.accountService.getCurrentUserValue()?.email;
-    const deliveryMethodId = 1;
 
     if (!address || !basketId || !email) {
       return throwError(() => new Error('Missing email, basket or saved shipping address'));
