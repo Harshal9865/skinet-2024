@@ -22,9 +22,9 @@ export class OrderHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.orderService.getOrdersForUser().subscribe({
-      next: (orders) => {
-        this.orders.set(orders);
-        this.loading.set(false);
+  next: (res) => {
+    this.orders.set(res.data);
+    this.loading.set(false);
       },
       error: (err) => {
         console.error('❌ Failed to load orders:', err);

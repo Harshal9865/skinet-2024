@@ -28,7 +28,7 @@ namespace API.Controllers
         {
             try
             {
-                Console.WriteLine("uyfhfc");
+                Console.WriteLine("📦 Creating order");
                 var email = User.RetrieveEmailFromPrincipal();
                 if (string.IsNullOrWhiteSpace(email))
                     return Unauthorized("❌ User email not found in token.");
@@ -58,22 +58,29 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                // Optional: inject ILogger and log here
                 return StatusCode(500, $"🔥 Internal Server Error: {ex.Message}");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<OrderToReturnDto>>> GetOrdersForUser()
+        public async Task<ActionResult<object>> GetOrdersForUser([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 6)
         {
-            var email = User?.Identity?.Name;
+            var email = User.RetrieveEmailFromPrincipal();
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized("❌ Email not found in token.");
 
-            var orders = await _orderService.GetOrdersForUserAsync(email);
+            var orders = await _orderService.GetOrdersForUserAsync(email, pageIndex, pageSize);
+            var totalCount = await _orderService.CountUserOrdersAsync(email);
+
             var result = _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders);
 
-            return Ok(result);
+            return Ok(new
+            {
+                data = result,
+                totalCount,
+                pageIndex,
+                pageSize
+            });
         }
     }
 }

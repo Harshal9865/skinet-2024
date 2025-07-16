@@ -100,5 +100,19 @@ namespace Infrastructure.Services
             var spec = new OrdersWithItemsAndOrderingSpecification(buyerEmail);
             return await _unitOfWork.Repository<Order>().ListAsync(spec);
         }
+
+        // ✅ New: Paginated orders
+        public async Task<IReadOnlyList<Order>> GetOrdersForUserAsync(string buyerEmail, int pageIndex, int pageSize)
+        {
+            var spec = new OrdersWithItemsAndOrderingSpecification(buyerEmail, pageIndex, pageSize);
+            return await _unitOfWork.Repository<Order>().ListAsync(spec);
+        }
+
+        // ✅ New: Count orders for pagination
+        public async Task<int> CountUserOrdersAsync(string buyerEmail)
+        {
+            var countSpec = new OrdersWithItemsAndOrderingSpecification(buyerEmail);
+            return await _unitOfWork.Repository<Order>().CountAsync(countSpec);
+        }
     }
 }

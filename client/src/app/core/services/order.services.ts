@@ -9,10 +9,10 @@ export class OrderService {
   private baseUrl = 'https://localhost:5051/api/orders';
 
   constructor(private http: HttpClient) {}
+getOrdersForUser(): Observable<{ data: Order[] }> {
+  return this.http.get<{ data: Order[] }>(this.baseUrl);
+}
 
-  getOrdersForUser(): Observable<Order[]> {
-    return this.http.get<Order[]>(this.baseUrl);
-  }
 
  placeOrder(order: OrderDto): Observable<Order> {
    return this.http.post<Order>(this.baseUrl, order); // ✅ CORRECT

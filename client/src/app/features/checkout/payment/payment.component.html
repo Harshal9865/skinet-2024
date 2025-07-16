@@ -1,34 +1,54 @@
-<div class="max-w-xl mx-auto text-center p-8">
-  <h2 class="text-2xl font-bold mb-6">Confirm Your Shipping Address</h2>
+<div class="payment-wrapper max-w-3xl mx-auto mt-8 bg-white shadow-md rounded-lg border p-6">
+  <h2 class="text-2xl font-semibold text-purple-700 mb-4 text-center">Review & Pay</h2>
 
-  <div *ngIf="address; else noAddress" class="bg-gray-100 p-6 rounded shadow text-left">
-    <p><strong>Name:</strong> {{ address.firstName }} {{ address.lastName }}</p>
-    <p><strong>Street:</strong> {{ address.street }}</p>
-    <p><strong>City:</strong> {{ address.city }}</p>
-    <p><strong>State:</strong> {{ address.state }}</p>
-    <p><strong>Zip Code:</strong> {{ address.zipCode }}</p>
+  <div *ngIf="address">
+    <!-- Address Section -->
+    <div class="bg-gray-100 p-4 rounded shadow text-left mb-6">
+      <p><strong>Name:</strong> {{ address.firstName }} {{ address.lastName }}</p>
+      <p><strong>Street:</strong> {{ address.street }}</p>
+      <p><strong>City:</strong> {{ address.city }}</p>
+      <p><strong>State:</strong> {{ address.state }}</p>
+      <p><strong>Zip Code:</strong> {{ address.zipCode }}</p>
+    </div>
+
+    <!-- Delivery Option -->
+    <mat-form-field appearance="fill" class="w-full mb-6">
+      <mat-label>Select Delivery Method</mat-label>
+      <mat-select [(ngModel)]="selectedDeliveryMethodId">
+        <mat-option *ngFor="let method of deliveryMethods" [value]="method.id">
+          {{ method.shortName }} - ₹{{ method.price }} ({{ method.deliveryTime }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Summary Section -->
+    <div class="summary bg-gray-50 p-4 rounded-lg mb-6 text-sm sm:text-base">
+      <div class="flex justify-between mb-1">
+        <span>Subtotal:</span>
+        <span>₹{{ subtotal }}</span>
+      </div>
+      <div class="flex justify-between mb-1">
+        <span>Tax (10%):</span>
+        <span>₹{{ tax }}</span>
+      </div>
+      <div class="flex justify-between mb-1">
+        <span>Delivery:</span>
+        <span>₹{{ deliveryCharge }}</span>
+      </div>
+      <div class="flex justify-between font-semibold text-lg border-t pt-2 mt-2">
+        <span>Total:</span>
+        <span>₹{{ totalWithTaxAndDelivery }}</span>
+      </div>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="w-full sm:w-48 h-12 text-base font-semibold bg-purple-700 hover:bg-blue-600 transition"
+      (click)="payNow()"
+      [disabled]="loading()"
+    >
+      Pay ₹{{ totalWithTaxAndDelivery }}
+    </button>
   </div>
-
-  <ng-template #noAddress>
-    <p class="text-red-600">⚠️ No address found. Please go back to checkout.</p>
-  </ng-template>
-
-  <mat-form-field appearance="fill" class="w-full mt-6">
-    <mat-label>Select Delivery Method</mat-label>
-    <mat-select [(ngModel)]="selectedDeliveryMethodId">
-      <mat-option *ngFor="let method of deliveryMethods" [value]="method.id">
-        {{ method.shortName }} - ₹{{ method.price }} ({{ method.deliveryTime }})
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <button
-    mat-raised-button
-    color="primary"
-    class="mt-6 w-40 h-12 text-lg"
-    (click)="payNow()"
-    [disabled]="!address"
-  >
-    Pay Now
-  </button>
 </div>
