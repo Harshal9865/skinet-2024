@@ -50,7 +50,7 @@
 }
 
 .status {
-  color: #7e22ce; 
+  color: #7e22ce;
 }
 
 .order-items {
@@ -67,6 +67,18 @@
   gap: 1rem;
 }
 
+.product-link,
+.product-name-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.product-link img:hover,
+.product-name-link:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
 .product-img {
   width: 5rem;
   height: 5rem;
@@ -80,16 +92,16 @@
 
 .product-name {
   font-weight: 500;
-  color: #111827; 
+  color: #111827;
 }
 
 .product-qty {
   font-size: 0.875rem;
-  color: #6b7280; 
+  color: #6b7280;
 }
 
 .product-price {
   text-align: right;
-  color: #1f2937; 
+  color: #1f2937;
   font-weight: 600;
 }

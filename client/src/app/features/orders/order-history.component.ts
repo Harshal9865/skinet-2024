@@ -4,12 +4,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { OrderService } from '../../core/services/order.services';
 import { Order } from '../../core/models/order';
-
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-order-history',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatCardModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatCardModule,RouterModule , MatProgressSpinnerModule],
   templateUrl: './order-history.component.html',
   styleUrls: ['./order-history.component.scss']
 })

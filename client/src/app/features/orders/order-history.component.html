@@ -34,16 +34,24 @@
 
       <div class="order-items">
         <div *ngFor="let item of order.orderItems" class="order-item">
-          <img
-            [src]="item.pictureUrl"
-            [alt]="item.productName"
-            class="product-img"
-            onerror="this.src='assets/images/placeholder.png'"
-          />
+          <!-- Clickable image -->
+          <a [routerLink]="['/shop', item.productId]" class="product-link">
+            <img
+              [src]="item.pictureUrl"
+              [alt]="item.productName"
+              class="product-img"
+              onerror="this.src='assets/images/placeholder.png'"
+            />
+          </a>
+
           <div class="product-info">
-            <p class="product-name">{{ item.productName }}</p>
+            <!-- Clickable name -->
+            <a [routerLink]="['/shop', item.productId]" class="product-name-link">
+              <p class="product-name">{{ item.productName }}</p>
+            </a>
             <p class="product-qty">Qty: {{ item.quantity }}</p>
           </div>
+
           <div class="product-price">₹{{ item.price }}</div>
         </div>
       </div>
