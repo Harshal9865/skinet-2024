@@ -6,3 +6,5 @@ namespace Core.Entities
         public List<BasketItem> Items { get; set; } = new();
     }
 }
+
+

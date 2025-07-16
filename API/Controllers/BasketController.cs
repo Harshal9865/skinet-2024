@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using API.Dtos;
 using Core.Entities;
 using Core.Interfaces;
@@ -28,7 +25,11 @@ namespace API.Controllers
             foreach (var item in dto.Items)
             {
                 var product = await _productRepo.GetByIdAsync(item.ProductId);
-                if (product == null) continue;
+                if (product == null)
+                {
+                    Console.WriteLine($"⚠️ Skipping invalid product ID: {item.ProductId}");
+                    continue;
+                }
 
                 items.Add(new BasketItem
                 {
@@ -37,8 +38,8 @@ namespace API.Controllers
                     ProductName = product.Name,
                     Price = product.Price,
                     PictureUrl = product.PictureUrl,
-                    Brand = product.Brand,       // ✅ Updated to string property
-                    Type = product.Type          // ✅ Updated to string property
+                    Brand = product.Brand,
+                    Type = product.Type
                 });
             }
 

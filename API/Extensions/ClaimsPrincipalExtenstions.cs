@@ -6,8 +6,7 @@ namespace API.Extensions
     {
         public static string? RetrieveEmailFromPrincipal(this ClaimsPrincipal user)
         {
-            // Use ClaimTypes.Name instead of ClaimTypes.Email based on your JWT
-            return user?.FindFirstValue(ClaimTypes.Name);
+           return user?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
         }
     }
 }

@@ -101,6 +101,7 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    // ✅ CORRECT camelCase keys for backend API
     const order = {
       email,
       basketId,

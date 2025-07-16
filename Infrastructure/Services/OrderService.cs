@@ -18,15 +18,32 @@ namespace Infrastructure.Services
 
         public async Task<Order?> CreateOrderAsync(string buyerEmail, int deliveryMethodId, string basketId, Address shippingAddress)
         {
+            Console.WriteLine($"📥 Creating order for {buyerEmail}, basket: {basketId}, delivery method: {deliveryMethodId}");
+            Console.WriteLine($"📦 Shipping to: {shippingAddress.Street}, {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.Zipcode}");
+
             var basket = await _basketRepo.GetBasketAsync(basketId);
-            if (basket == null || basket.Items.Count == 0) return null;
+            if (basket == null)
+            {
+                Console.WriteLine("❌ Basket not found.");
+                return null;
+            }
+
+            if (basket.Items.Count == 0)
+            {
+                Console.WriteLine("❌ Basket is empty.");
+                return null;
+            }
 
             var items = new List<OrderItem>();
 
             foreach (var item in basket.Items)
             {
                 var productItem = await _unitOfWork.Repository<Product>().GetByIdAsync(item.ProductId);
-                if (productItem == null) return null;
+                if (productItem == null)
+                {
+                    Console.WriteLine($"❌ Product not found with ID: {item.ProductId}");
+                    return null;
+                }
 
                 var itemOrdered = new ProductItemOrdered
                 {
@@ -35,18 +52,20 @@ namespace Infrastructure.Services
                     PictureUrl = productItem.PictureUrl
                 };
 
-                var orderItem = new OrderItem
+                items.Add(new OrderItem
                 {
                     ItemOrdered = itemOrdered,
                     Price = productItem.Price,
                     Quantity = item.Quantity
-                };
-
-                items.Add(orderItem);
+                });
             }
 
             var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(deliveryMethodId);
-            if (deliveryMethod == null) return null;
+            if (deliveryMethod == null)
+            {
+                Console.WriteLine($"❌ Delivery method not found: ID {deliveryMethodId}");
+                return null;
+            }
 
             var subtotal = items.Sum(i => i.Price * i.Quantity);
             var order = new Order(buyerEmail, shippingAddress, deliveryMethod, items, subtotal);
@@ -54,9 +73,14 @@ namespace Infrastructure.Services
             _unitOfWork.Repository<Order>().Add(order);
             var result = await _unitOfWork.Complete();
 
-            if (result <= 0) return null;
+            if (result <= 0)
+            {
+                Console.WriteLine("❌ Failed to save order.");
+                return null;
+            }
 
             await _basketRepo.DeleteBasketAsync(basketId);
+            Console.WriteLine("✅ Order created and basket cleared.");
             return order;
         }
 

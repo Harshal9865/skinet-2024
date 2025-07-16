@@ -1,12 +1,24 @@
 <div class="max-w-xl mx-auto text-center p-8">
-  <h2 class="text-2xl font-bold mb-6">Payment</h2>
-  <p class="mb-4 text-gray-600">Simulate your payment to proceed with the order.</p>
+  <h2 class="text-2xl font-bold mb-6">Confirm Your Shipping Address</h2>
+
+  <div *ngIf="address; else noAddress" class="bg-gray-100 p-6 rounded shadow text-left">
+    <p><strong>Name:</strong> {{ address.firstName }} {{ address.lastName }}</p>
+    <p><strong>Street:</strong> {{ address.street }}</p>
+    <p><strong>City:</strong> {{ address.city }}</p>
+    <p><strong>State:</strong> {{ address.state }}</p>
+    <p><strong>Zip Code:</strong> {{ address.zipCode }}</p>
+  </div>
+
+  <ng-template #noAddress>
+    <p class="text-red-600">⚠️ No address found. Please go back to checkout.</p>
+  </ng-template>
 
   <button
     mat-raised-button
     color="primary"
-    class="mt-4 w-40 h-12 text-lg"
+    class="mt-6 w-40 h-12 text-lg"
     (click)="payNow()"
+    [disabled]="!address"
   >
     Pay Now
   </button>

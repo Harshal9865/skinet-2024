@@ -1,37 +1,49 @@
-using System.Collections.Concurrent;
 using Core.Entities;
 using Core.Interfaces;
+using StackExchange.Redis;
+using System.Text.Json;
 
 namespace Infrastructure.Data
 {
     public class BasketRepository : IBasketRepository
     {
-        private static readonly ConcurrentDictionary<string, Basket> _baskets = new();
+        private readonly IDatabase _database;
 
-        public Task<Basket?> GetBasketAsync(string id)
+        public BasketRepository(IConnectionMultiplexer redis)
         {
-            if (string.IsNullOrWhiteSpace(id))
-                return Task.FromResult<Basket?>(null);
-
-            _baskets.TryGetValue(id, out var basket);
-            return Task.FromResult<Basket?>(basket);
+            _database = redis.GetDatabase();
         }
 
-        public Task<Basket?> UpdateBasketAsync(Basket basket)
+        public async Task<Basket?> GetBasketAsync(string id)
         {
-            if (string.IsNullOrWhiteSpace(basket.Id))
-                return Task.FromResult<Basket?>(null); // or throw an exception if you prefer
+            if (string.IsNullOrWhiteSpace(id)) return null;
 
-            _baskets[basket.Id] = basket;
-            return Task.FromResult<Basket?>(basket);
+            var data = await _database.StringGetAsync(id);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            return data.IsNullOrEmpty ? null : JsonSerializer.Deserialize<Basket>(data!, options);
         }
 
-        public Task<bool> DeleteBasketAsync(string id)
+        public async Task<Basket?> UpdateBasketAsync(Basket basket)
         {
-            if (string.IsNullOrWhiteSpace(id))
-                return Task.FromResult(false);
+            if (string.IsNullOrWhiteSpace(basket.Id)) return null;
 
-            return Task.FromResult(_baskets.TryRemove(id, out _));
+            var created = await _database.StringSetAsync(
+                basket.Id,
+                JsonSerializer.Serialize(basket),
+                TimeSpan.FromDays(30)
+            );
+
+            return created ? basket : null;
+        }
+
+        public async Task<bool> DeleteBasketAsync(string id)
+        {
+            return await _database.KeyDeleteAsync(id);
         }
     }
 }

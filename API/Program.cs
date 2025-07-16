@@ -6,7 +6,7 @@ using Infrastructure.Identity;
 using Infrastructure.Services;
 using API.Extensions;
 using API.RequestHelpers;
-
+using StackExchange.Redis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -19,31 +19,30 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
         policy.AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials() // ✅ add this
+              .AllowCredentials()
               .WithOrigins("http://localhost:4200", "https://localhost:4200");
     });
 });
 
-
-// Store database
+// SQL Server Connections
 builder.Services.AddDbContext<StoreContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// Identity database
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
 
-// JWT Auth via extension method
+// JWT Auth
 builder.Services.AddIdentityServices(builder.Configuration);
 
 // Identity Core
@@ -55,7 +54,14 @@ builder.Services.AddIdentityCore<AppUser>(opt =>
 .AddEntityFrameworkStores<AppIdentityDbContext>()
 .AddSignInManager<SignInManager<AppUser>>();
 
-// Repositories & UoW
+// Redis - Use configuration value from appsettings.json
+builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
+{
+    var config = builder.Configuration.GetSection("Redis")["ConnectionString"] ?? "localhost:6379";
+    return ConnectionMultiplexer.Connect(config);
+});
+
+// Dependency Injection - Core Services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
@@ -66,7 +72,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
-// Swagger + JWT Support
+// Swagger + JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -94,11 +100,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Kestrel Port Config
+// Kestrel Port Setup
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5050);
-    serverOptions.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps());
+    serverOptions.ListenAnyIP(5050); // HTTP
+    serverOptions.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps()); // HTTPS
 });
 
 var app = builder.Build();
@@ -118,7 +124,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Migrate and seed
+// Auto-migration and seeding
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

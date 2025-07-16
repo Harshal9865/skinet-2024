@@ -27,7 +27,7 @@ namespace Infrastructure.Identity
                         Street = "123 Street",
                         City = "Mumbai",
                         State = "MH",
-                        Zipcode = "400001"
+                        ZipCode = "400001"
                     }
                 };
 
@@ -46,7 +46,7 @@ namespace Infrastructure.Identity
                         Street = "Admin Lane",
                         City = "Delhi",
                         State = "DL",
-                        Zipcode = "110001"
+                        ZipCode = "110001"
                     }
                 };
 
