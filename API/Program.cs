@@ -99,12 +99,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Fix for Render: Only use HTTPS locally
+// ✅ Safe HTTPS Binding for Dev Only (Render handles HTTPS at proxy level)
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     serverOptions.ListenAnyIP(5050); // HTTP always
-    if (env != "Production")
+
+    if (builder.Environment.IsDevelopment())
     {
         serverOptions.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps());
     }
@@ -127,7 +127,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// ✅ Migrate & Seed
+// ✅ Apply EF Core migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -151,7 +151,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ✅ Skip HTTPS redirection in production (Render handles HTTPS at proxy level)
+// ✅ Skip redirect in production (Render already uses HTTPS)
 if (!app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
@@ -166,7 +166,9 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors("CorsPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();
