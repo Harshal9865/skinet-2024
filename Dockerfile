@@ -23,8 +23,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out ./
 
-# Set environment variable and expose port
-ENV ASPNETCORE_URLS=http://0.0.0.0:5051
-EXPOSE 5051
+# Use Render's dynamic port binding
+ENV ASPNETCORE_URLS=http://+:${PORT}
+EXPOSE 10000
 
 ENTRYPOINT ["dotnet", "API.dll"]

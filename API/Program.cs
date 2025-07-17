@@ -105,15 +105,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Kestrel (HTTPS for Dev only)
+// ✅ Use dynamic port for Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5050";
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5050); // HTTP (always enabled)
-
-    if (builder.Environment.IsDevelopment())
-    {
-        serverOptions.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps());
-    }
+    serverOptions.ListenAnyIP(int.Parse(port));
 });
 
 var app = builder.Build();
@@ -157,7 +153,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ✅ Only redirect in non-production
+// ✅ Redirect only in local dev
 if (!app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
