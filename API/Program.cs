@@ -23,6 +23,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -34,9 +35,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ✅ PostgreSQL Configuration
 builder.Services.AddDbContext<StoreContext>(options =>
 {
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         x => x.MigrationsAssembly("API")
     );
@@ -44,11 +46,10 @@ builder.Services.AddDbContext<StoreContext>(options =>
 
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
 
-builder.Services.AddIdentityServices(builder.Configuration);
-
+// ✅ Identity
 builder.Services.AddIdentityCore<AppUser>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
@@ -57,12 +58,16 @@ builder.Services.AddIdentityCore<AppUser>(opt =>
 .AddEntityFrameworkStores<AppIdentityDbContext>()
 .AddSignInManager<SignInManager<AppUser>>();
 
+builder.Services.AddIdentityServices(builder.Configuration);
+
+// ✅ Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
 {
     var config = builder.Configuration.GetSection("Redis")["ConnectionString"] ?? "localhost:6379";
     return ConnectionMultiplexer.Connect(config);
 });
 
+// ✅ Repositories & Services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
@@ -72,6 +77,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
+// ✅ Swagger + JWT Auth
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -99,10 +105,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Safe HTTPS Binding for Dev Only (Render handles HTTPS at proxy level)
+// ✅ Kestrel (HTTPS for Dev only)
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5050); // HTTP always
+    serverOptions.ListenAnyIP(5050); // HTTP (always enabled)
 
     if (builder.Environment.IsDevelopment())
     {
@@ -151,7 +157,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ✅ Skip redirect in production (Render already uses HTTPS)
+// ✅ Only redirect in non-production
 if (!app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
@@ -171,4 +177,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.Run();
