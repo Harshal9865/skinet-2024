@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { jwtDecode } from 'jwt-decode';
-
+import jwtDecode from 'jwt-decode';
 
 export interface DecodedToken {
   exp: number;
