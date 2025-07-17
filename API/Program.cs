@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
         policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
-              .WithOrigins("http://localhost:4200", "https://localhost:4200");
+              .WithOrigins("http://localhost:4200","https://skinet-2024-1ngp.vercel.app", "https://localhost:4200");
     });
 });
 
