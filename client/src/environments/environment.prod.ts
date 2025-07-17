@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://yourproductionapi.com'   // change to prod server later
+  apiUrl: 'https://shopin-g5u6.onrender.com/api' // ✅ Pointing to your live backend API
 };
