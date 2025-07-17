@@ -1,5 +1,5 @@
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-preview AS build
 WORKDIR /src
 
 # Copy solution and projects
@@ -19,11 +19,11 @@ WORKDIR /src/API
 RUN dotnet publish -c Release -o /app/out
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-preview
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Set environment and port (5051 based on your note)
+# Set environment and port
 ENV ASPNETCORE_URLS=http://0.0.0.0:5051
 EXPOSE 5051
 
