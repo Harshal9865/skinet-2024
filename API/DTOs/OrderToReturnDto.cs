@@ -7,7 +7,7 @@ namespace API.DTOs
     {
         public int Id { get; set; }
         public DateTime OrderDate { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;  // ✅ Mapped below
         public string DeliveryMethod { get; set; } = string.Empty;
         public decimal ShippingPrice { get; set; }
         public decimal Subtotal { get; set; }

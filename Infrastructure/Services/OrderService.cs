@@ -35,7 +35,7 @@ namespace Infrastructure.Services
             }
 
             var items = new List<OrderItem>();
-
+Console.WriteLine($"🧺 Basket retrieved. Items count: {basket.Items.Count}");
             foreach (var item in basket.Items)
             {
                 var productItem = await _unitOfWork.Repository<Product>().GetByIdAsync(item.ProductId);

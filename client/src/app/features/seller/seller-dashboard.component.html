@@ -1,0 +1,52 @@
+<h2 class="title">Seller Dashboard</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" enctype="multipart/form-data" class="product-form">
+  <mat-form-field appearance="outline">
+    <mat-label>Product Name</mat-label>
+    <input matInput formControlName="name" placeholder="Enter product name" required />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Price</mat-label>
+    <input matInput type="number" formControlName="price" placeholder="Enter price" required />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Brand</mat-label>
+    <input matInput formControlName="brand" placeholder="Brand name" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Type</mat-label>
+    <input matInput formControlName="type" placeholder="Product type" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" placeholder="Product description"></textarea>
+  </mat-form-field>
+
+  <label for="imageUpload" class="file-label">Product Image</label>
+  <input
+    id="imageUpload"
+    type="file"
+    accept="image/*"
+    (change)="onImageSelected($event)"
+    title="Upload product image"
+    required
+    class="file-input"
+  />
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+    Upload Product
+  </button>
+</form>
+
+<div class="product-list">
+  <h3 class="subtitle">Your Products</h3>
+  <div *ngFor="let p of products()" class="product-card">
+    <p><strong>{{ p.name }}</strong> - ₹{{ p.price }}</p>
+    <p>{{ p.description }}</p>
+    <button mat-stroked-button color="warn" (click)="delete(p.id)">Delete</button>
+  </div>
+</div>

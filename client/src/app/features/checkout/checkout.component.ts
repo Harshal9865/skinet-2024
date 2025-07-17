@@ -76,31 +76,31 @@ export class CheckoutComponent implements OnInit {
     console.log('✅ Checkout form patched with address');
   }
 
-  submit(): void {
-    console.log('🚀 submit() triggered');
+ submit(): void {
+  console.log('🚀 submit() triggered');
 
-    if (this.checkoutForm.invalid) {
-      console.warn('⚠️ Form is invalid. Marking all as touched.');
-      this.checkoutForm.markAllAsTouched();
-      return;
-    }
-
-    const address = this.checkoutForm.value;
-    console.log('📦 Address form value:', address);
-
-    const basketId = localStorage.getItem('basket_id');
-    const email = this.accountService.getCurrentUserValue()?.email;
-
-    if (!basketId || !email) {
-      console.error('❌ Missing basketId or user email. Cannot proceed.');
-      this.snack.open('Please login and add items to cart.', 'Close', { duration: 3000 });
-      return;
-    }
-
-    // ✅ Store address for use in payment page
-    localStorage.setItem('shipping_address', JSON.stringify(address));
-
-    // ✅ Redirect to payment page
-    this.router.navigate(['/payment']);
+  if (this.checkoutForm.invalid) {
+    console.warn('⚠️ Form is invalid. Marking all as touched.');
+    this.checkoutForm.markAllAsTouched();
+    return;
   }
+
+  const address = this.checkoutForm.value;
+  const basketId = localStorage.getItem('basket_id');
+  const email = this.accountService.getCurrentUserValue()?.email;
+
+  console.log('📦 Form Address:', address);
+  console.log('🧺 basket_id from localStorage:', basketId);
+  console.log('📧 User email:', email);
+
+  if (!basketId || !email) {
+    console.error('❌ Missing basketId or user email. Cannot proceed.');
+    this.snack.open('Please login and add items to cart.', 'Close', { duration: 3000 });
+    return;
+  }
+
+  localStorage.setItem('shipping_address', JSON.stringify(address));
+  this.router.navigate(['/payment']);
+}
+
 }

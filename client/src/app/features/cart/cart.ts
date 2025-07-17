@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CartService } from '../../features/cart/cart.service';
 import { BasketItem } from '../../shared/models/basket';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-cart',
@@ -14,13 +15,16 @@ import { BasketItem } from '../../shared/models/basket';
   styleUrls: ['./cart.scss']
 })
 export class CartComponent {
+  private destroyRef = inject(DestroyRef);
   items: BasketItem[] = [];
   baseUrl = 'https://localhost:5051/';
 
   constructor(private cartService: CartService) {
-    this.cartService.basket$.subscribe(basket => {
-      this.items = basket?.items ?? [];
-    });
+    this.cartService.basket$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(basket => {
+        this.items = basket?.items ?? [];
+      });
   }
 
   get subtotal(): number {
@@ -28,6 +32,6 @@ export class CartComponent {
   }
 
   remove(id: number): void {
-    this.cartService.removeItem(id); // 👈 Instant remove
+    this.cartService.removeItem(id);
   }
 }

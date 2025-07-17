@@ -23,6 +23,7 @@ namespace API.Controllers
             _mapper = mapper;
         }
 
+        // ✅ Create Order
         [HttpPost]
         public async Task<ActionResult<OrderToReturnDto>> CreateOrder([FromBody] OrderDto orderDto)
         {
@@ -62,8 +63,23 @@ namespace API.Controllers
             }
         }
 
+        // ✅ GET: Non-paginated - returns flat list of orders
         [HttpGet]
-        public async Task<ActionResult<object>> GetOrdersForUser([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 6)
+        public async Task<ActionResult<List<OrderToReturnDto>>> GetOrdersForUser()
+        {
+            var email = User.RetrieveEmailFromPrincipal();
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized("❌ Email not found in token.");
+
+            var orders = await _orderService.GetOrdersForUserAsync(email);
+            var result = _mapper.Map<IReadOnlyList<Order>, List<OrderToReturnDto>>(orders);
+
+            return Ok(result);
+        }
+
+        // ✅ GET: Paginated - optional endpoint (you can rename route to avoid conflict)
+        [HttpGet("paged")]
+        public async Task<ActionResult<object>> GetOrdersPaged([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 6)
         {
             var email = User.RetrieveEmailFromPrincipal();
             if (string.IsNullOrWhiteSpace(email))

@@ -4,11 +4,12 @@ import { User } from '../../core/models/user';
 import { AccountService } from '../../core/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
 import { take } from 'rxjs/operators';
-import { RouterModule } from '@angular/router'; 
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, MatButtonModule,RouterModule],
+  imports: [CommonModule, MatButtonModule, RouterModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })

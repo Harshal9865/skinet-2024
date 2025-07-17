@@ -32,10 +32,11 @@ namespace Infrastructure.Data
         {
             if (string.IsNullOrWhiteSpace(basket.Id)) return null;
 
+            // ✅ Set a TTL of 1 day (adjustable)
             var created = await _database.StringSetAsync(
                 basket.Id,
                 JsonSerializer.Serialize(basket),
-                TimeSpan.FromDays(30)
+                TimeSpan.FromDays(1) // ⏰ TTL: Basket expires after 1 day of inactivity
             );
 
             return created ? basket : null;

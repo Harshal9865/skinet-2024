@@ -13,9 +13,9 @@ import { CheckoutComponent } from './features/checkout/checkout.component';
 import { OrderHistoryComponent } from './features/orders/order-history.component';
 import { PaymentComponent } from './features/checkout/payment/payment.component';
 
-
 import { AuthGuard } from './core/services/guards/auth.guard';
 import { AdminGuard } from './core/services/guards/admin.guard';
+import { SellerDashboardComponent } from './features/seller/seller-dashboard.component.ts';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -33,8 +33,13 @@ export const routes: Routes = [
       { path: 'edit', component: ProfileEditComponent }
     ]
   },
+  {
+    path: 'seller',
+    component: SellerDashboardComponent,
+    canActivate: [AuthGuard] // Optional: Add a SellerGuard later if needed
+  },
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard] },
-  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard] }, // ✅ Added
+  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard] },
   { path: 'orders', component: OrderHistoryComponent, canActivate: [AuthGuard] },
   {
     path: 'admin',

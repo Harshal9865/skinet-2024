@@ -6,9 +6,10 @@
       alt="User Avatar"
       class="w-20 h-20 rounded-full border-2 border-purple-400 shadow"
     />
-
     <div>
-      <h2 class="text-2xl font-semibold text-purple-700">{{ user?.displayName || 'User' }}</h2>
+      <h2 class="text-2xl font-semibold text-purple-700">
+        {{ user?.displayName || 'User' }}
+      </h2>
       <p class="text-gray-600">{{ user?.email }}</p>
     </div>
   </div>
@@ -19,12 +20,10 @@
       <p class="text-sm text-gray-500">Full Name</p>
       <p class="text-lg">{{ user?.displayName }}</p>
     </div>
-
     <div>
       <p class="text-sm text-gray-500">Email Address</p>
       <p class="text-lg">{{ user?.email }}</p>
     </div>
-
     <div>
       <p class="text-sm text-gray-500">Roles</p>
       <p class="text-lg">{{ user?.roles?.join(', ') || 'User' }}</p>
@@ -70,6 +69,21 @@
     <h3 class="text-lg font-semibold text-purple-700 mb-2">Need Help?</h3>
     <a routerLink="/contact" class="text-purple-500 hover:underline">Contact Us</a>
   </div>
+
+ <!-- Section: Seller Dashboard -->
+<div class="border-t pt-4">
+  <h3 class="text-lg font-semibold text-purple-700 mb-2">Seller Dashboard</h3>
+  <a
+    mat-stroked-button
+    color="accent"
+    class="rounded px-6 py-2 border-purple-500 text-purple-700 hover:bg-purple-50"
+    routerLink="/seller"
+  >
+    Manage Your Products
+  </a>
+</div>
+
+
 
   <!-- Edit Button (Centered) -->
   <div class="pt-6 flex justify-center">

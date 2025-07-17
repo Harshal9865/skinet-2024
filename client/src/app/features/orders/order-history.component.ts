@@ -5,11 +5,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { OrderService } from '../../core/services/order.services';
 import { Order } from '../../core/models/order';
 import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-order-history',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatCardModule,RouterModule , MatProgressSpinnerModule],
+  imports: [CommonModule, MatCardModule, RouterModule, MatProgressSpinnerModule],
   templateUrl: './order-history.component.html',
   styleUrls: ['./order-history.component.scss']
 })
@@ -22,11 +23,12 @@ export class OrderHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.orderService.getOrdersForUser().subscribe({
-  next: (res) => {
-    this.orders.set(res.data);
-    this.loading.set(false);
+      next: (res: Order[]) => {
+        console.log('✅ Orders loaded:', res);
+        this.orders.set(res);
+        this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('❌ Failed to load orders:', err);
         this.error.set('❌ Failed to load orders');
         this.loading.set(false);

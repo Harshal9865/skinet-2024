@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,21 @@ namespace Infrastructure.Data
         public void DeleteProduct(Product product)
         {
             _context.Products.Remove(product);
+        }
+
+        public void UpdateProduct(Product product)
+        {
+            _context.Entry(product).State = EntityState.Modified;
+        }
+
+        public bool ProductExists(int id)
+        {
+            return _context.Products.Any(x => x.Id == id);
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
         }
 
         public async Task<IReadOnlyList<string>> GetBrandsAsync()
@@ -66,22 +82,18 @@ namespace Infrastructure.Data
 
         public async Task<Product?> GetProductByIdAsync(int id)
         {
-            return await _context.Products.FindAsync(id).ConfigureAwait(false);
+            return await _context.Products
+                .FirstOrDefaultAsync(x => x.Id == id)
+                .ConfigureAwait(false);
         }
 
-        public bool ProductExists(int id)
+        public async Task<IReadOnlyList<Product>> GetSellerProductsAsync(string email)
         {
-            return _context.Products.Any(x => x.Id == id);
-        }
-
-        public async Task<bool> SaveChangesAsync()
-        {
-            return await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-        }
-
-        public void UpdateProduct(Product product)
-        {
-            _context.Entry(product).State = EntityState.Modified;
+            return await _context.Products
+                .Where(p => p.SellerEmail == email)
+                .OrderByDescending(p => p.Id)
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
     }
 }

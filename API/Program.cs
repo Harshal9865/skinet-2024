@@ -10,6 +10,7 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Services to the Container
 // ----------------------------
 
-builder.Services.AddControllers();
+// ✅ Ensures JSON returned to frontend is in camelCase (e.g., "orderItems" not "OrderItems")
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 // CORS
 builder.Services.AddCors(options =>
@@ -34,7 +39,10 @@ builder.Services.AddCors(options =>
 // SQL Server Connections
 builder.Services.AddDbContext<StoreContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.MigrationsAssembly("API")
+    );
 });
 
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
@@ -132,7 +140,7 @@ using (var scope = app.Services.CreateScope())
     {
         var storeContext = services.GetRequiredService<StoreContext>();
         await storeContext.Database.MigrateAsync();
-        await StoreContextSeed.SeedAsync(storeContext); // ✅ Seed Products & DeliveryMethods
+        await StoreContextSeed.SeedAsync(storeContext);
 
         var identityContext = services.GetRequiredService<AppIdentityDbContext>();
         await identityContext.Database.MigrateAsync();
