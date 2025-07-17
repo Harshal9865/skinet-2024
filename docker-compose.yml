@@ -8,3 +8,23 @@ services:
       MSSQL_SA_PASSWORD: "Password@1"
     ports:
       - "1433:1433"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - sql
+      - redis
+    ports:
+      - "5051:5051"  # map container port 5051 to host port 5051
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5051
+      ConnectionStrings__DefaultConnection: "Server=sql;Database=skinet;User=sa;Password=Password@1"
+      Redis__ConnectionString: "redis"
