@@ -171,6 +171,7 @@ app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGet("/", () => Results.Ok("✅ API is running"));
 
 app.MapControllers();
 
