@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
         policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
-              .WithOrigins("http://localhost:4200","https://skinet-2024-8l7e.vercel.app"
+              .WithOrigins("http://localhost:4200","https://skinet-frontend.onrender.com/"
 , "https://localhost:4200");
     });
 });
