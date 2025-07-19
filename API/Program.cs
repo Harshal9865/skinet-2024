@@ -31,12 +31,11 @@ builder.Services.AddCors(options =>
         policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
-              .WithOrigins("http://localhost:4200","https://skinet-frontend.onrender.com/"
-, "https://localhost:4200");
+              .WithOrigins("https://localhost:4200");
     });
 });
 
-// ✅ PostgreSQL Configuration
+// PostgreSQL or SQL Server
 builder.Services.AddDbContext<StoreContext>(options =>
 {
     options.UseNpgsql(
@@ -50,7 +49,7 @@ builder.Services.AddDbContext<AppIdentityDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
 
-// ✅ Identity
+// Identity
 builder.Services.AddIdentityCore<AppUser>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
@@ -61,14 +60,14 @@ builder.Services.AddIdentityCore<AppUser>(opt =>
 
 builder.Services.AddIdentityServices(builder.Configuration);
 
-// ✅ Redis
+// Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
 {
     var config = builder.Configuration.GetSection("Redis")["ConnectionString"] ?? "localhost:6379";
     return ConnectionMultiplexer.Connect(config);
 });
 
-// ✅ Repositories & Services
+// Repositories & Services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
@@ -78,7 +77,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
-// ✅ Swagger + JWT Auth
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -106,12 +105,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Use dynamic port for Render
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5050";
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.ListenAnyIP(int.Parse(port));
-});
+// ✅ FIXED LOCALHOST PORT (5051)
+builder.WebHost.UseUrls("https://localhost:5051");
 
 var app = builder.Build();
 
@@ -130,7 +125,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// ✅ Apply EF Core migrations and seed data
+// Apply EF Core migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -154,26 +149,13 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ✅ Redirect only in local dev
-if (!app.Environment.IsProduction())
-{
-    app.UseHttpsRedirection();
-}
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=604800");
-    }
-});
-
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGet("/", () => Results.Ok("✅ API is running"));
-
+app.MapGet("/", () => Results.Ok("✅ API is running locally on port 5051"));
 app.MapControllers();
 
 app.Run();
