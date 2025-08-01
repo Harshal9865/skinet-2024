@@ -1,4 +1,4 @@
-<header class="border-b p-3 w-full">
+<header class="border-b p-3 w-full relative">
   <div class="flex items-center justify-between max-w-screen-2xl mx-auto">
     <img routerLink="/" src="/images/myylogo.png" alt="app logo" class="max-h-16" />
 
@@ -37,5 +37,19 @@
     </div>
   </div>
 
+  <!-- ✅ Optional mat-progress-bar (you can keep or remove) -->
   <mat-progress-bar *ngIf="isLoading()" mode="indeterminate" color="primary"></mat-progress-bar>
+
+  <!-- ✅ Aesthetic loader overlay -->
+  <div
+    *ngIf="isLoading()"
+    class="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50"
+  >
+    <span class="relative flex h-16 w-16">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-600 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-16 w-16 bg-purple-700 text-white items-center justify-center text-xl font-semibold">
+        SK
+      </span>
+    </span>
+  </div>
 </header>

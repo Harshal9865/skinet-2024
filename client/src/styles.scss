@@ -1,28 +1,13 @@
-@use '@angular/material' as mat;
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-$customTheme: mat.define-theme();
-@include mat.core();
-
-.custom-theme {
-  @include mat.all-component-themes($customTheme);
-
-  .mdc-button,
-  .mdc-raised-button,
-  .mdc-stroked-button,
-  .mdc-flat-button {
-    @apply rounded-md;
-  }
-}
-
+/* Optional: Tailwind + Material UI customization */
 .custom-badge .mat-badge-content {
   width: 24px;
   height: 24px;
   font-size: 14px;
-  line-height: 24px; // fixed this from `line: height 24px;`
+  line-height: 24px;
 }
 
 .custom-badge .mat-icon {
@@ -30,3 +15,11 @@ $customTheme: mat.define-theme();
   width: 32px;
   height: 32px;
 }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+   font-family: 'Inter', sans-serif;
+}
+
